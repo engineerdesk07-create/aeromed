@@ -1,0 +1,19 @@
+# Node dependencies and logs
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+
+# Operating system / editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test / coverage output
+coverage/

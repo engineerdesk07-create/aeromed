@@ -1,0 +1,17 @@
+{
+  "name": "aeromed-demo-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Educational Express API for the AeroMed academic prototype; uses simulated data.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
