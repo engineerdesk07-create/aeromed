@@ -1,0 +1,2414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AeroMed — Solar-Powered Elevated Emergency Medical Transport</title>
+<meta name="description" content="AeroMed: a solar-powered elevated ropeway system that carries patients above traffic, direct from the accident site to the hospital.">
+
+<!--
+  HOW TO EDIT THIS SITE (no coding needed):
+  - All the writing is in the HTML below. Use your browser's "Find" (Ctrl/Cmd+F)
+    to locate a sentence and retype it.
+  - Colors live in the ":root { ... }" block near the top of <style>. Change a
+    hex code like #F5A947 and everything using it updates.
+  - HOSPITAL DATA: search for "HOSPITAL DATA" near the bottom of this file. Each hospital
+    is one block with its name, location, phone, facilities and bed counts.
+    Change the facilities list after you confirm them with the hospital.
+  - The closing section has a placeholder team/event line — search for
+    "EDIT THIS LINE" to find it.
+  - To publish: drag this whole folder onto netlify.com/drop, or upload it to
+    a GitHub repository and turn on GitHub Pages. No build step needed.
+    (Location access only works on a secure https:// address, which both give you.)
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-night:   #10152A;
+    --bg-section: #161C36;
+    --bg-dusk:    #2B2358;
+    --amber:      #F5A947;
+    --coral:      #E8604A;
+    --steel:      #8291A8;
+    --steel-dark: #4B5568;
+    --cloud:      #EDEFF4;
+    --ink:        #10152A;
+    --ok:         #5FD38D;
+    --hairline:   rgba(237,239,244,0.14);
+    --hairline-dark: rgba(16,21,42,0.12);
+    --display: 'Space Grotesk', sans-serif;
+    --body:    'IBM Plex Sans', sans-serif;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  @media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+  body{
+    margin:0; background:var(--bg-night); color:var(--cloud);
+    font-family:var(--body); font-size:17px; line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{ font-family:var(--display); margin:0; color:var(--cloud); }
+  p{ margin:0; }
+  a{ color:inherit; }
+  .wrap{ max-width:1120px; margin:0 auto; padding:0 24px; }
+  section{ padding:96px 0; }
+  @media (max-width:640px){ section{ padding:64px 0; } }
+  .eyebrow-free-heading{ font-size:clamp(2rem,4vw,2.75rem); line-height:1.12; max-width:22ch; }
+  .light-heading{ color:var(--ink); }
+  .lead{ font-size:1.125rem; color:var(--cloud); opacity:0.82; max-width:58ch; margin-top:18px; }
+  .compare .lead{ color:var(--ink); }
+
+  /* ---- icon symbols ---- */
+  .icon{ width:26px; height:26px; stroke:currentColor; fill:none; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round; flex:none; }
+
+  /* ---- header ---- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:40;
+    backdrop-filter:blur(10px); background:rgba(16,21,42,0.6);
+    border-bottom:1px solid var(--hairline);
+  }
+  header .wrap{ display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .brand{ display:flex; align-items:baseline; gap:10px; text-decoration:none; }
+  .wordmark{
+    font-family:var(--display); font-weight:600; font-size:1.1rem; letter-spacing:0.01em;
+    background:linear-gradient(135deg, var(--cloud), var(--amber));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .brand-sub{ font-size:0.78rem; font-style:italic; opacity:0.5; display:none; }
+  @media (min-width:560px){ .brand-sub{ display:inline; } }
+  header nav{ display:flex; gap:22px; }
+  header nav a{ text-decoration:none; font-size:0.9rem; color:var(--cloud); opacity:0.75; }
+  header nav a:hover{ opacity:1; }
+
+  /* ---- hero ---- */
+  .hero{
+    padding-top:96px; padding-bottom:56px;
+    background:linear-gradient(180deg, var(--bg-night) 0%, var(--bg-dusk) 55%, #4A3A6E 78%, #C9793F 100%);
+    min-height:100vh;
+    position:relative; overflow:hidden;
+  }
+  .hero .wrap{ position:relative; z-index:1; }
+  .bg-orb{
+    position:absolute; border-radius:50%; filter:blur(70px);
+    opacity:0.32; pointer-events:none; z-index:0;
+    animation:orbDrift 26s ease-in-out infinite;
+  }
+  .orb-1{ width:440px; height:440px; background:radial-gradient(circle, var(--amber), transparent 70%); top:-140px; left:-100px; }
+  .orb-2{ width:380px; height:380px; background:radial-gradient(circle, var(--coral), transparent 70%); bottom:-110px; right:-70px; animation-duration:32s; animation-delay:-8s; }
+  .orb-3{ width:320px; height:320px; background:radial-gradient(circle, var(--steel), transparent 70%); top:38%; right:8%; animation-duration:22s; animation-delay:-14s; }
+  @keyframes orbDrift{
+    0%,100%{ transform:translate(0,0) scale(1); }
+    50%{ transform:translate(30px,-26px) scale(1.08); }
+  }
+  @media (prefers-reduced-motion: reduce){ .bg-orb{ animation:none; } }
+
+  .tilt-wrap{ perspective:1400px; }
+  .tilt-wrap, .control-deck{
+    animation:heroReveal 0.9s cubic-bezier(0.16,1,0.3,1) both;
+  }
+  .control-deck{ animation-delay:0.15s; }
+  @keyframes heroReveal{
+    from{ opacity:0; transform:translateY(24px); }
+    to{ opacity:1; transform:translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce){ .tilt-wrap, .control-deck{ animation:none; } }
+
+  .control-deck{
+    margin-top:28px;
+    background:rgba(16,21,42,0.42);
+    backdrop-filter:blur(14px) saturate(1.2);
+    border:1px solid rgba(237,239,244,0.12);
+    border-radius:14px;
+    padding:26px 28px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .hero h1{ font-size:clamp(2.4rem,5.6vw,4.2rem); font-weight:600; line-height:1.08; letter-spacing:-0.01em; max-width:17ch; }
+  .tagline-strip{
+    margin-top:16px; font-family:var(--display); font-size:0.95rem; font-weight:500;
+    color:var(--amber); letter-spacing:0.01em;
+  }
+  .hero .lead{ margin-top:20px; }
+  .hero-cta{
+    display:inline-block; margin-top:30px; padding:13px 26px;
+    border:1px solid var(--amber); border-radius:2px;
+    font-family:var(--body); font-weight:500; font-size:0.95rem;
+    text-decoration:none; color:var(--amber);
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  .hero-cta:hover{ background:var(--amber); color:var(--ink); }
+  .control-deck .hero-cta{ margin-top:22px; }
+
+  #hero-canvas-wrap{
+    position:relative; margin-top:24px; width:100%;
+    height:clamp(420px,72vh,880px); border-radius:4px; overflow:hidden; cursor:grab;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(237,239,244,0.06);
+    transform-style:preserve-3d;
+    transition:transform 0.35s cubic-bezier(0.16,1,0.3,1);
+  }
+  #hero-canvas-wrap:active{ cursor:grabbing; }
+  #hero-canvas{ display:block; width:100%; height:100%; filter:contrast(1.08) saturate(1.14); }
+  #hero-canvas-wrap::after{
+    content:''; position:absolute; inset:0; pointer-events:none; z-index:2;
+    background:radial-gradient(ellipse at center, transparent 52%, rgba(8,10,22,0.4) 100%);
+  }
+  .letterbox-bar{
+    position:absolute; left:0; right:0; height:7%; background:#05060d;
+    pointer-events:none; z-index:3;
+  }
+  .letterbox-bar.top{ top:0; }
+  .letterbox-bar.bottom{ bottom:0; }
+
+  .speed-hud{
+    position:absolute; left:14px; bottom:14px; z-index:5;
+    background:rgba(16,21,42,0.6); backdrop-filter:blur(6px);
+    border:1px solid var(--hairline); border-radius:3px;
+    padding:8px 14px; pointer-events:none;
+  }
+  .speed-hud .label{ font-size:0.68rem; text-transform:uppercase; letter-spacing:0.08em; opacity:0.55; }
+  .speed-hud .value{ font-family:var(--display); font-size:1.3rem; font-weight:600; color:var(--amber); line-height:1.2; }
+  .speed-hud .value span{ font-size:0.7rem; font-weight:500; color:var(--cloud); opacity:0.6; margin-left:3px; }
+
+  .hero-controls{
+    margin-top:16px; display:flex; flex-wrap:wrap; align-items:center; gap:18px;
+    font-size:0.85rem; opacity:0.75;
+  }
+  .hero-controls input[type="range"]{ width:160px; accent-color:var(--amber); vertical-align:middle; }
+  .dispatch-panel{ margin-top:20px; }
+  .dispatch-label{ font-size:0.85rem; opacity:0.75; margin-bottom:9px; }
+  .dispatch-buttons{ display:flex; gap:10px; flex-wrap:wrap; }
+  .dispatch-btn{
+    padding:9px 16px; border:1px solid var(--amber); border-radius:2px;
+    background:transparent; color:var(--amber); font-family:var(--body); font-size:0.85rem; font-weight:500;
+    cursor:pointer; transition:background 0.2s ease, color 0.2s ease, opacity 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  }
+  .dispatch-btn:hover:not(:disabled){ background:var(--amber); color:var(--ink); transform:translateY(-2px); box-shadow:0 8px 20px rgba(245,169,71,0.28); }
+  .dispatch-btn:active:not(:disabled){ transform:translateY(0) scale(0.97); }
+  .dispatch-btn:disabled{ opacity:0.35; cursor:default; border-color:var(--steel); color:var(--steel); background:transparent; }
+  .cancel-btn{ border-color:var(--coral); color:var(--coral); }
+  .cancel-btn:hover:not(:disabled){ background:var(--coral); color:var(--ink); box-shadow:0 8px 20px rgba(232,96,74,0.28); }
+  .tour-btn{ background:var(--amber); color:var(--ink); border-color:var(--amber); font-weight:600; }
+  .tour-btn:hover:not(:disabled){ background:var(--cloud); border-color:var(--cloud); }
+  .scene-caption{
+    position:absolute; left:0; right:0; bottom:0; z-index:5;
+    padding:12px 20px; background:linear-gradient(0deg, rgba(16,21,42,0.88), rgba(16,21,42,0));
+    color:var(--cloud); font-size:0.92rem; text-align:center;
+    min-height:1.3em;
+  }
+  .dispatch-status{ margin-top:10px; margin-bottom:0; font-size:0.85rem; color:var(--amber); opacity:0.9; min-height:1.2em; }
+  .station-strip{
+    margin-top:14px; display:flex; flex-wrap:wrap; gap:8px 6px; font-size:0.82rem; opacity:0.6;
+  }
+  .station-strip span:not(:last-child)::after{ content:"→"; margin-left:8px; opacity:0.5; }
+
+  /* ---- problem ---- */
+  .problem .wrap{ max-width:760px; }
+
+  /* ---- feature list (Why AeroMed) ---- */
+  .feature-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:36px 48px; margin-top:48px;
+  }
+  @media (max-width:700px){ .feature-grid{ grid-template-columns:1fr; } }
+  .feature-item{ display:flex; gap:16px; padding-top:20px; border-top:1px solid var(--hairline); }
+  .feature-item .icon{ color:var(--amber); margin-top:2px; }
+  .feature-item h3{ font-size:1.02rem; font-weight:600; margin-bottom:5px; }
+  .feature-item p{ font-size:0.92rem; opacity:0.78; }
+
+  /* ---- route / journey ---- */
+  .journey{ background:var(--bg-section); }
+  #journey-diagram{ width:100%; height:auto; margin-top:48px; }
+  .cable-path{ fill:none; stroke:var(--steel); stroke-width:2.5; stroke-linecap:round; }
+  .cable-path.reveal{ transition:stroke-dashoffset 1.6s cubic-bezier(0.4,0,0.2,1); }
+  .node-dot{
+    fill:var(--bg-section); stroke:var(--amber); stroke-width:2.5;
+    transform-origin:center; transform-box:fill-box; transform:scale(0); opacity:0;
+    transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1), opacity 0.5s ease;
+  }
+  .node-dot.reveal{ transform:scale(1); opacity:1; }
+  .node-num{ font-family:var(--display); font-size:13px; font-weight:600; fill:var(--amber); text-anchor:middle; dominant-baseline:central; }
+  @media (prefers-reduced-motion: reduce){ .cable-path.reveal, .node-dot{ transition:none !important; } }
+
+  .journey-steps{ display:grid; grid-template-columns:repeat(5,1fr); gap:20px; margin-top:12px; }
+  @media (max-width:900px){ .journey-steps{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:520px){ .journey-steps{ grid-template-columns:1fr; } }
+  .journey-step h3{ font-size:1rem; font-weight:600; color:var(--amber); margin-bottom:8px; }
+  .journey-step p{ font-size:0.92rem; opacity:0.82; }
+
+  .mini-route{ margin-top:56px; padding-top:40px; border-top:1px solid var(--hairline); }
+  .mini-route h3{ font-size:1.05rem; font-weight:600; margin-bottom:4px; }
+  .mini-route p.note{ font-size:0.88rem; opacity:0.6; margin-top:4px; }
+  #mini-route-diagram{ width:100%; max-width:640px; height:auto; margin-top:20px; display:block; }
+
+  /* ---- blueprint diagrams (cabin, interior, lift, architecture) ---- */
+  .system-grid{ display:grid; grid-template-columns:1fr 1fr; gap:56px; margin-top:48px; }
+  @media (max-width:760px){ .system-grid{ grid-template-columns:1fr; gap:48px; } }
+  .system-card svg{ width:100%; height:auto; }
+  .system-card h3{ font-size:1.15rem; margin-bottom:6px; }
+  .system-card p.note{ font-size:0.88rem; opacity:0.6; margin-top:4px; }
+  .blueprint-line{ fill:none; stroke:var(--steel); stroke-width:1.5; }
+  .blueprint-fill{ fill:var(--bg-night); stroke:var(--steel); stroke-width:1.5; }
+  .blueprint-amber{ stroke:var(--amber); fill:none; stroke-width:1.5; }
+  .blueprint-dash{ stroke:var(--steel); fill:none; stroke-width:1.3; stroke-dasharray:4 4; }
+  .blueprint-label{ font-family:var(--body); font-size:11.5px; fill:var(--cloud); opacity:0.75; }
+  .blueprint-label-sub{ font-family:var(--body); font-size:9.5px; fill:var(--cloud); opacity:0.5; }
+  .blueprint-dot{ fill:var(--amber); }
+  .arch-box{ fill:var(--bg-night); stroke:var(--steel); stroke-width:1.4; }
+  .arch-box-hub{ fill:var(--bg-night); stroke:var(--amber); stroke-width:1.6; }
+  .arch-title{ font-family:var(--body); font-size:12.5px; font-weight:600; fill:var(--cloud); text-anchor:middle; }
+  .arch-sub{ font-family:var(--body); font-size:10px; fill:var(--cloud); opacity:0.55; text-anchor:middle; }
+  .arch-legend-text{ font-family:var(--body); font-size:11px; fill:var(--cloud); opacity:0.7; }
+
+  section.system, section.interior, section.lift, section.architecture{ background:var(--bg-night); }
+
+  /* ---- key specifications (light section) ---- */
+  .compare{ background:var(--cloud); color:var(--ink); }
+  .table-scroll{ overflow-x:auto; margin-top:44px; }
+  table{ width:100%; border-collapse:collapse; min-width:520px; }
+  th,td{ text-align:left; padding:13px 18px; border-bottom:1px solid var(--hairline-dark); font-size:0.94rem; }
+  thead th{ font-family:var(--display); font-weight:600; font-size:0.9rem; padding-top:0; }
+  th:first-child, td:first-child{ padding-left:0; color:var(--ink); opacity:0.6; font-size:0.85rem; width:40%; }
+  td:nth-child(2){ border-left:2px solid var(--amber); padding-left:16px; }
+
+  /* ---- safety grid ---- */
+  .safety-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px 32px; margin-top:48px; }
+  @media (max-width:800px){ .safety-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:520px){ .safety-grid{ grid-template-columns:1fr; } }
+  .safety-item{ display:flex; gap:12px; align-items:flex-start; font-size:0.92rem; }
+  .safety-item .icon{ width:19px; height:19px; color:var(--amber); margin-top:3px; stroke-width:2.2; }
+
+  /* ---- closing / footer ---- */
+  .closing .lead{ margin-top:18px; }
+  .closing .credit{ margin-top:56px; padding-top:24px; border-top:1px solid var(--hairline); font-size:0.85rem; opacity:0.55; }
+  footer{ padding:36px 0; border-top:1px solid var(--hairline); }
+  footer .wrap{ display:flex; flex-direction:column; gap:6px; }
+  .footer-taglines{ font-size:0.88rem; opacity:0.65; }
+  .footer-italic{ font-size:0.85rem; font-style:italic; opacity:0.45; }
+
+  :focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
+
+  /* keep content clear of phone status bars and home indicators */
+  html{ scroll-padding-top:env(safe-area-inset-top, 0px); }
+  header{ padding-top:env(safe-area-inset-top, 0px); }
+  .hero{ padding-top:calc(96px + env(safe-area-inset-top, 0px)); }
+  body{ padding-bottom:env(safe-area-inset-bottom, 0px); }
+
+  /* ================= HOSPITAL FINDER ================= */
+  .finder{ background:var(--bg-section); }
+  .finder .lead{ max-width:62ch; }
+  .demo-banner{
+    margin-top:28px; padding:14px 18px; border-left:3px solid var(--coral);
+    background:rgba(232,96,74,0.10); font-size:0.92rem; max-width:78ch;
+  }
+  .demo-banner strong{ color:var(--coral); }
+  .finder-grid{
+    display:grid; grid-template-columns:minmax(0,380px) minmax(0,1fr); gap:40px; margin-top:40px; align-items:start;
+  }
+  @media (max-width:900px){ .finder-grid{ grid-template-columns:1fr; } }
+  .f-group{ border:0; padding:0; margin:0 0 28px; min-width:0; }
+  .f-group legend, .f-label{ font-family:var(--display); font-size:1.02rem; font-weight:600; padding:0; margin-bottom:12px; }
+  .f-note{ font-size:0.85rem; opacity:0.7; margin-top:10px; max-width:46ch; }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .chip{
+    padding:10px 15px; border:1px solid var(--hairline); border-radius:2px; background:transparent;
+    color:var(--cloud); font-family:var(--body); font-size:0.9rem; cursor:pointer;
+    transition:background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+  .chip:hover{ border-color:var(--amber); }
+  .chip[aria-pressed="true"]{ background:var(--amber); border-color:var(--amber); color:var(--ink); font-weight:600; }
+  .check{ display:flex; gap:10px; align-items:center; font-size:0.88rem; opacity:0.85; margin-bottom:12px; cursor:pointer; }
+  .check input{ accent-color:var(--amber); width:16px; height:16px; }
+  .loc-ok{ color:var(--ok); }
+  .loc-warn{ color:var(--amber); }
+
+  .req-panel{ border-top:1px solid var(--hairline); padding-top:22px; }
+  .req-panel h3{ font-size:1.1rem; margin-bottom:12px; }
+  .req-block{ margin-top:16px; }
+  .req-block h4{ margin:0 0 6px; font-family:var(--display); font-size:0.92rem; font-weight:600; color:var(--amber); }
+  .req-block ul{ margin:0; padding-left:18px; font-size:0.9rem; opacity:0.88; }
+  .req-block li{ margin-bottom:3px; }
+  .req-empty{ font-size:0.92rem; opacity:0.7; }
+
+  .results-head{ font-size:0.95rem; opacity:0.85; margin-bottom:20px; max-width:64ch; }
+  .results-head strong{ color:var(--amber); }
+  .h-card{ padding:24px 0; border-top:1px solid var(--hairline); }
+  .h-card.best{ border-top:2px solid var(--amber); }
+  .h-top{ display:flex; flex-wrap:wrap; gap:8px 14px; align-items:baseline; justify-content:space-between; }
+  .h-top h3{ font-size:1.2rem; }
+  .fit{ font-size:0.8rem; font-weight:600; padding:3px 10px; border-radius:2px; }
+  .fit-good{ background:rgba(95,211,141,0.16); color:var(--ok); }
+  .fit-part{ background:rgba(245,169,71,0.16); color:var(--amber); }
+  .fit-low{ background:rgba(232,96,74,0.16); color:var(--coral); }
+  .h-sub{ font-size:0.88rem; opacity:0.65; margin-top:4px; }
+  .h-why{ margin-top:12px; font-size:0.95rem; max-width:68ch; }
+  .fac-list{ list-style:none; margin:14px 0 0; padding:0; display:flex; flex-wrap:wrap; gap:8px 22px; font-size:0.88rem; }
+  .fac-list li{ display:flex; gap:7px; align-items:baseline; }
+  .fac-list .yes{ color:var(--ok); font-weight:600; }
+  .fac-list .no{ color:var(--coral); font-weight:600; }
+  .fac-list .opt{ opacity:0.6; }
+  .bed-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:16px 22px; margin-top:18px; }
+  .bed .bed-name{ font-size:0.82rem; opacity:0.75; display:flex; justify-content:space-between; gap:8px; }
+  .bed .bed-name b{ font-weight:600; opacity:1; color:var(--cloud); }
+  .bed.needed .bed-name{ color:var(--amber); opacity:1; }
+  .meter{ height:6px; background:rgba(237,239,244,0.12); border-radius:1px; margin-top:6px; overflow:hidden; }
+  .meter span{ display:block; height:100%; background:var(--steel); }
+  .bed.needed .meter span{ background:var(--amber); }
+  .bed.none .meter span{ background:var(--coral); }
+  .h-meta{ font-size:0.8rem; opacity:0.6; margin-top:14px; }
+  .h-meta .stale{ color:var(--coral); opacity:1; font-weight:600; }
+  .h-actions{ display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
+  .h-actions a{
+    padding:8px 16px; border:1px solid var(--hairline); border-radius:2px; text-decoration:none; font-size:0.88rem;
+    transition:border-color 0.2s ease, color 0.2s ease;
+  }
+  .h-actions a:hover{ border-color:var(--amber); color:var(--amber); }
+  .results-empty{ padding:34px 0; border-top:1px solid var(--hairline); font-size:0.98rem; opacity:0.78; max-width:52ch; }
+  .results-note{ margin-top:24px; font-size:0.82rem; opacity:0.55; max-width:72ch; }
+
+  /* ---- dispatch console (5 required outputs) ---- */
+  .console{ background:var(--bg-night); }
+  .console .lead{ max-width:62ch; }
+  .console-grid{ display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr); gap:56px; margin-top:40px; align-items:start; }
+  @media (max-width:900px){ .console-grid{ grid-template-columns:1fr; gap:36px; } }
+  .console-controls{ position:sticky; top:16px; }
+  @media (max-width:900px){ .console-controls{ position:static; } }
+  .c-field{ margin-bottom:18px; }
+  .c-field label{ display:flex; justify-content:space-between; font-size:0.88rem; opacity:0.85; margin-bottom:6px; }
+  .c-field label b{ color:var(--amber); font-weight:600; }
+  .c-row{ display:flex; gap:8px; }
+  .c-field input[type=text]{ flex:1; min-width:0; background:var(--bg-section); color:var(--cloud); border:1px solid var(--hairline); border-radius:2px; padding:10px 12px; font:inherit; font-size:0.95rem; }
+  .c-field input[type=text]:focus{ outline:2px solid var(--amber); outline-offset:1px; }
+  .c-field select{ width:100%; background:var(--bg-section); color:var(--cloud); border:1px solid var(--hairline); border-radius:2px; padding:10px 12px; font:inherit; font-size:0.95rem; }
+  .c-field select:focus{ outline:2px solid var(--amber); outline-offset:1px; }
+  .c-field input[type=range]{ width:100%; accent-color:var(--amber); }
+  .out-card{ padding:26px 0; border-top:1px solid var(--hairline); }
+  .out-card:first-child{ border-top:2px solid var(--amber); }
+  .out-head{ display:flex; align-items:baseline; gap:14px; margin-bottom:14px; }
+  .out-num{ font-family:var(--display); font-weight:700; color:var(--amber); font-size:0.95rem; letter-spacing:0.08em; }
+  .out-head h3{ font-size:1.3rem; }
+  .out-main{ font-size:1.05rem; margin-bottom:10px; }
+  .out-main strong{ color:var(--amber); }
+  .out-sub{ font-size:0.9rem; opacity:0.78; margin-top:8px; }
+  .out-warn{ font-size:0.9rem; color:var(--coral); margin-top:8px; }
+  .mini{ margin-top:14px; display:flex; flex-direction:column; }
+  .mini-row{ display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,2fr) auto; gap:12px; padding:8px 0; border-top:1px solid var(--hairline); font-size:0.88rem; align-items:center; }
+  .mini-row.pick{ color:var(--amber); font-weight:600; }
+  .mini-row.off{ opacity:0.45; }
+  .mini-row .meter{ margin-top:0; }
+  .mini-row.cap{ grid-template-columns:minmax(0,1.6fr) minmax(0,1.4fr) auto; }
+  .tri-badge{ display:inline-block; font-weight:600; font-size:0.85rem; padding:3px 12px; border-radius:2px; }
+  .tri-red{ background:rgba(232,96,74,0.2); color:var(--coral); }
+  .tri-orange{ background:rgba(245,169,71,0.2); color:var(--amber); }
+  .tri-yellow{ background:rgba(242,211,79,0.18); color:#F2D34F; }
+  .tri-green{ background:rgba(95,211,141,0.16); color:var(--ok); }
+  .why-list{ margin:10px 0 0; padding-left:18px; font-size:0.88rem; opacity:0.85; }
+  .score-big{ display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:10px; }
+  .score-big .n{ font-family:var(--display); font-size:3.2rem; font-weight:700; line-height:1; }
+  .score-big .g{ font-family:var(--display); font-size:1.3rem; color:var(--amber); }
+  .score-meter{ height:10px; }
+  .score-meter span{ background:var(--ok) !important; }
+  .console-actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+  .map-box{ margin-top:14px; border:1px solid var(--hairline); border-radius:2px; overflow:hidden; background:var(--bg-section); }
+  .map-box iframe{ display:block; width:100%; height:260px; border:0; }
+  a.map-link{ display:inline-block; text-decoration:none; margin-top:10px; }
+  .console-empty{ padding:28px 0; border-top:2px solid var(--amber); opacity:0.8; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a class="brand" href="#top">
+      <span class="wordmark">AeroMed</span>
+    </a>
+  </div>
+</header>
+
+<a id="top"></a>
+<section class="hero">
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+  <div class="wrap">
+    <div class="tilt-wrap" id="tilt-wrap">
+      <div id="hero-canvas-wrap">
+        <canvas id="hero-canvas"></canvas>
+        <div class="letterbox-bar top"></div>
+        <div class="letterbox-bar bottom"></div>
+        <div class="speed-hud">
+          <div class="label">Cruising speed</div>
+          <div class="value" id="speed-readout">50<span>km/h</span></div>
+        </div>
+        <div class="scene-caption" id="scene-caption">Cabin ready and waiting at Station A.</div>
+      </div>
+    </div>
+
+    <div class="control-deck">
+      <div class="hero-controls">
+        <label for="speed-slider">Adjust cabin speed</label>
+        <input type="range" id="speed-slider" min="30" max="70" step="1" value="50">
+        <span id="speed-slider-value">50 km/h</span>
+      </div>
+      <div class="dispatch-panel">
+        <div class="dispatch-label">Watch it work, start to finish</div>
+        <div class="dispatch-buttons">
+          <button type="button" class="dispatch-btn tour-btn" id="tour-btn">Play tutorial</button>
+        </div>
+      </div>
+      <div class="dispatch-panel">
+        <div class="dispatch-label">Simulate an emergency call</div>
+        <div class="dispatch-buttons">
+          <button type="button" class="dispatch-btn" data-station="0">Station A</button>
+          <button type="button" class="dispatch-btn" data-station="1">Intermediate 1</button>
+          <button type="button" class="dispatch-btn" data-station="2">Intermediate 2</button>
+          <button type="button" class="dispatch-btn" data-station="3">Hospital</button>
+          <button type="button" class="dispatch-btn cancel-btn" id="cancel-dispatch" disabled>Cancel</button>
+        </div>
+      </div>
+    <div class="station-strip">
+      <span>Station A · pickup</span><span>Intermediate station</span><span>Intermediate station</span><span>Hospital station</span>
+    </div>
+    <a class="hero-cta" href="#dispatch-console">Open dispatch console</a>
+    <a class="hero-cta" href="#hospital-finder">Find a suitable hospital</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= DISPATCH CONSOLE: the 5 required outputs ================= -->
+<section class="console" id="dispatch-console">
+  <div class="wrap">
+    <h2 class="eyebrow-free-heading">Emergency dispatch console</h2>
+    <p class="lead">Describe the call and the patient to get the five dispatch outputs.</p>
+
+    <div class="demo-banner" role="note">
+      <strong>Prototype.</strong> Triage is a simplified demo score, and ambulances and beds are simulated. In a real emergency call 108 or 112.
+    </div>
+
+    <div class="console-grid">
+      <div class="console-controls">
+        <fieldset class="f-group">
+          <legend>What is the emergency?</legend>
+          <div class="chip-row" id="c-chips"></div>
+        </fieldset>
+
+        <div class="f-group">
+          <div class="f-label">Patient condition</div>
+          <div class="c-field"><label for="c-conscious">Consciousness</label>
+            <select id="c-conscious"><option value="alert">Alert and talking</option><option value="voice">Responds only to voice or pain</option><option value="unresp">Unresponsive</option></select></div>
+          <div class="c-field"><label for="c-breath">Breathing</label>
+            <select id="c-breath"><option value="normal">Normal</option><option value="laboured">Laboured or noisy</option><option value="stopped">Not breathing</option></select></div>
+          <div class="c-field"><label for="c-bleed">Bleeding</label>
+            <select id="c-bleed"><option value="none">None</option><option value="controlled">Present, controlled</option><option value="severe">Severe, heavy</option></select></div>
+          <div class="c-field"><label for="c-spo2">Oxygen level <b id="c-spo2-v">97%</b></label>
+            <input type="range" id="c-spo2" min="60" max="100" step="1" value="97"></div>
+          <div class="c-field"><label for="c-hr">Heart rate <b id="c-hr-v">80 bpm</b></label>
+            <input type="range" id="c-hr" min="30" max="180" step="1" value="80"></div>
+        </div>
+
+        <div class="f-group">
+          <div class="f-label">Where is the patient?</div>
+          <div class="c-field"><label for="c-place">Pick a place</label>
+            <select id="c-place"><option value="">Choose a place...</option></select></div>
+          <div class="c-field"><label for="c-search">Or search any place, or type coordinates</label>
+            <div class="c-row"><input type="text" id="c-search" placeholder="e.g. Bobbili bus stand, or 18.1067, 83.3955" autocomplete="off"><button type="button" class="dispatch-btn" id="c-search-btn">Search</button></div></div>
+          <div class="c-field" id="c-results-wrap" hidden><label for="c-results">Search results</label>
+            <select id="c-results"></select></div>
+          <div class="f-label" style="margin-top:6px">Transport</div>
+          <div class="c-field"><label for="c-mode">Patient travels to hospital by</label>
+            <select id="c-mode"><option value="aero">AeroMed elevated cabin</option><option value="road">Road ambulance</option></select></div>
+          <button type="button" class="dispatch-btn" id="c-locate">Start live location</button>
+          <p class="f-note" id="c-loc">Using the Vizianagaram city centre until you share your location.</p>
+          <div class="map-box"><iframe id="c-map" title="Your location on Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe></div>
+          <a class="dispatch-btn map-link" id="c-map-link" target="_blank" rel="noopener">Open in Google Maps</a>
+        </div>
+
+        <button type="button" class="dispatch-btn cancel-btn" id="c-reset">Reset session (free all units and beds)</button>
+      </div>
+
+      <div id="console-out" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOSPITAL FINDER ================= -->
+<section class="finder" id="hospital-finder">
+  <div class="wrap">
+    <h2 class="eyebrow-free-heading">Find the right hospital for the emergency</h2>
+    <p class="lead">Choose the type of emergency and share your location. AeroMed ranks nearby hospitals by what they can treat, how many beds are free and how far they are, and explains each ranking.</p>
+
+    <div class="demo-banner" role="note">
+      <strong>Prototype for demonstration.</strong> Bed numbers are simulated and facility lists come from public listings, so they must be confirmed with each hospital. This page does not replace emergency services. In a real emergency call 108 or 112.
+    </div>
+
+    <div class="finder-grid">
+      <div class="finder-controls">
+        <fieldset class="f-group">
+          <legend>What is the emergency?</legend>
+          <div class="chip-row" id="emergency-chips"></div>
+        </fieldset>
+
+        <div class="f-group">
+          <div class="f-label">Where are you?</div>
+          <button type="button" class="dispatch-btn" id="locate-btn">Use my location</button>
+          <p class="f-note" id="loc-status" aria-live="polite">Not shared yet. Distances use the Vizianagaram city centre until you share your location. Your location stays in your browser and is not sent or saved anywhere.</p>
+        </div>
+
+        <div class="req-panel" id="requirements" aria-live="polite"></div>
+      </div>
+
+      <div class="finder-results">
+        <div id="results" aria-live="polite"></div>
+        <p class="results-note">Distances are straight-line measurements. Road times assume an average city speed and are estimates only. Facility lists are unverified placeholders from public listings. A real system would need live data from each hospital.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-taglines">AeroMed — because every second counts.</div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ===== Hero 3D scene =====
+(function(){
+  var canvas = document.getElementById('hero-canvas');
+  var wrap = document.getElementById('hero-canvas-wrap');
+  if(!canvas || !wrap) return;
+
+  if(!window.THREE){
+    var msg = document.createElement('div');
+    msg.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-family:sans-serif;font-size:0.85rem;color:#EDEFF4;opacity:0.8;';
+    msg.textContent = '3D preview could not load (the three.js script did not run). Try opening this file directly in a browser tab.';
+    wrap.appendChild(msg);
+    return;
+  }
+
+  try {
+
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var COL = {
+    steel: 0x8291A8, steelDark: 0x4b5568, amber: 0xF5A947,
+    cloud: 0xEDEFF4, coral: 0xE8604A, road: 0x1b2140,
+    laneMark: 0xd8dce6, median: 0xe0b24a, wheel: 0x14161f
+  };
+
+  var scene = new THREE.Scene();
+  scene.fog = new THREE.Fog(0x2a2455, 16, 40);
+  var camera = new THREE.PerspectiveCamera(45, wrap.clientWidth / Math.max(wrap.clientHeight,1), 0.1, 120);
+  var defaultEye = new THREE.Vector3(0, 3.6, 16.5);
+  var defaultTarget = new THREE.Vector3(0, 2.0, 0);
+  var camEyePos = new THREE.Vector3(0, 7, 25);
+  var camTargetPos = defaultTarget.clone();
+  camera.position.copy(camEyePos);
+  camera.lookAt(camTargetPos);
+
+  var renderer = new THREE.WebGLRenderer({canvas: canvas, antialias:true, alpha:true});
+  renderer.setClearColor(0x000000, 0);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setSize(wrap.clientWidth, wrap.clientHeight);
+
+  scene.add(new THREE.AmbientLight(0x3a3f6e, 0.95));
+  var sunLight = new THREE.DirectionalLight(0xffd9a0, 1.1);
+  sunLight.position.set(6, 8, 4);
+  scene.add(sunLight);
+
+  var rig = new THREE.Group();
+  scene.add(rig);
+
+  // ---------- road ----------
+  var road = new THREE.Mesh(
+    new THREE.PlaneGeometry(34, 13),
+    new THREE.MeshStandardMaterial({color:COL.road, roughness:0.9})
+  );
+  road.rotation.x = -Math.PI/2;
+  rig.add(road);
+
+  var median = new THREE.Mesh(
+    new THREE.BoxGeometry(30, 0.02, 0.12),
+    new THREE.MeshStandardMaterial({color:COL.median, roughness:0.6})
+  );
+  median.position.set(0, 0.011, -1.0);
+  rig.add(median);
+
+  function laneDashes(z){
+    var dashMat = new THREE.MeshStandardMaterial({color:COL.laneMark, roughness:0.6});
+    var dashGeo = new THREE.BoxGeometry(0.9, 0.02, 0.12);
+    for(var x=-13; x<=13; x+=1.7){
+      var d = new THREE.Mesh(dashGeo, dashMat);
+      d.position.set(x, 0.011, z);
+      rig.add(d);
+    }
+  }
+  laneDashes(0.9);
+  laneDashes(3.6);
+  laneDashes(-3.0);
+
+  // ---------- vehicles: real proportions (roughly car-height-to-pillar-height), not tiny blocks ----------
+  function addWheels(parent, halfLen, halfWid, hubY){
+    var tireMat = new THREE.MeshStandardMaterial({color:COL.wheel});
+    var hubMat = new THREE.MeshStandardMaterial({color:0x6b7280});
+    var tireGeo = new THREE.CylinderGeometry(0.22, 0.22, 0.18, 12);
+    var hubGeo = new THREE.CylinderGeometry(0.09, 0.09, 0.19, 8);
+    [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(function(sgn){
+      var tire = new THREE.Mesh(tireGeo, tireMat);
+      tire.rotation.x = Math.PI/2;
+      tire.position.set(sgn[0]*halfLen, hubY, sgn[1]*halfWid);
+      parent.add(tire);
+      var hub = new THREE.Mesh(hubGeo, hubMat);
+      hub.rotation.x = Math.PI/2;
+      hub.position.copy(tire.position);
+      parent.add(hub);
+    });
+  }
+
+  function makeCar(color){
+    var g = new THREE.Group();
+    var chassis = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.55, 0.85), new THREE.MeshStandardMaterial({color:color}));
+    chassis.position.y = 0.46;
+    g.add(chassis);
+    var roof = new THREE.Mesh(new THREE.BoxGeometry(0.78, 0.4, 0.75), new THREE.MeshStandardMaterial({color:0x1c2340}));
+    roof.position.set(-0.08, 0.87, 0);
+    g.add(roof);
+    addWheels(g, 0.56, 0.46, 0.24);
+    return g;
+  }
+
+  function makeBus(){
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.BoxGeometry(3.6, 1.3, 1.2), new THREE.MeshStandardMaterial({color:0xB98A4A}));
+    body.position.y = 0.78;
+    g.add(body);
+    var winStripe = new THREE.Mesh(new THREE.BoxGeometry(3.1, 0.32, 0.05), new THREE.MeshStandardMaterial({color:COL.cloud}));
+    winStripe.position.set(0, 1.0, 0.62);
+    g.add(winStripe);
+    var winStripe2 = winStripe.clone();
+    winStripe2.position.z = -0.62;
+    g.add(winStripe2);
+    addWheels(g, 1.3, 0.65, 0.31);
+    return g;
+  }
+
+  function makeTruck(){
+    var g = new THREE.Group();
+    var trailer = new THREE.Mesh(new THREE.BoxGeometry(3.4, 1.2, 1.15), new THREE.MeshStandardMaterial({color:0x5b6480}));
+    trailer.position.set(0.25, 0.72, 0);
+    g.add(trailer);
+    var cab = new THREE.Mesh(new THREE.BoxGeometry(0.95, 1.0, 1.1), new THREE.MeshStandardMaterial({color:0x3a4270}));
+    cab.position.set(-2.0, 0.67, 0);
+    g.add(cab);
+    addWheels(g, 1.45, 0.62, 0.31);
+    return g;
+  }
+
+  function makeAmbulance(){
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.77, 0.86), new THREE.MeshStandardMaterial({color:0xF2F3F6}));
+    body.position.y = 0.58;
+    g.add(body);
+    var cab = new THREE.Mesh(new THREE.BoxGeometry(0.58, 0.58, 0.82), new THREE.MeshStandardMaterial({color:0xdfe3ea}));
+    cab.position.set(0.77, 0.87, 0);
+    g.add(cab);
+    var crossMat = new THREE.MeshStandardMaterial({color:COL.coral, emissive:COL.coral, emissiveIntensity:0.4});
+    var cv = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.38, 0.06), crossMat);
+    cv.position.set(-0.12, 0.96, 0.44);
+    g.add(cv);
+    var ch = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.12, 0.06), crossMat);
+    ch.position.set(-0.12, 0.96, 0.44);
+    g.add(ch);
+    var lightR = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.12, 0.31), new THREE.MeshStandardMaterial({color:COL.coral, emissive:COL.coral, emissiveIntensity:1}));
+    lightR.position.set(-0.38, 1.0, 0.22);
+    g.add(lightR);
+    var lightB = new THREE.Mesh(new THREE.BoxGeometry(0.19, 0.12, 0.31), new THREE.MeshStandardMaterial({color:0x4d7fd6, emissive:0x4d7fd6, emissiveIntensity:1}));
+    lightB.position.set(-0.38, 1.0, -0.22);
+    g.add(lightB);
+    addWheels(g, 0.67, 0.48, 0.26);
+
+    // "AMBULANCE" text on both sides
+    var labelCanvas = document.createElement('canvas');
+    labelCanvas.width = 256; labelCanvas.height = 64;
+    var lctx = labelCanvas.getContext('2d');
+    lctx.fillStyle = '#F2F3F6';
+    lctx.fillRect(0, 0, 256, 64);
+    lctx.fillStyle = '#E8604A';
+    lctx.font = 'bold 30px sans-serif';
+    lctx.textAlign = 'center';
+    lctx.textBaseline = 'middle';
+    lctx.fillText('AMBULANCE', 128, 34);
+    var labelTex = new THREE.CanvasTexture(labelCanvas);
+    var labelGeo = new THREE.PlaneGeometry(1.3, 0.28);
+    var labelSideA = new THREE.Mesh(labelGeo, new THREE.MeshBasicMaterial({map: labelTex}));
+    labelSideA.position.set(-0.05, 0.58, 0.44);
+    g.add(labelSideA);
+    var labelSideB = new THREE.Mesh(labelGeo, new THREE.MeshBasicMaterial({map: labelTex}));
+    labelSideB.rotation.y = Math.PI;
+    labelSideB.position.set(-0.05, 0.58, -0.44);
+    g.add(labelSideB);
+
+    g.userData.lights = [lightR, lightB];
+    return g;
+  }
+
+  var vehicles = [];
+  function addVehicle(mesh, x, z, dir, speed){
+    mesh.position.set(x, 0, z);
+    if(dir < 0) mesh.rotation.y = Math.PI;
+    rig.add(mesh);
+    vehicles.push({mesh:mesh, dir:dir, speed:speed});
+    return mesh;
+  }
+
+  // lane A: moving traffic heading one way
+  addVehicle(makeCar(0x2c3358), -10, 0.9, 1, 2.0);
+  addVehicle(makeBus(), -2, 0.9, 1, 1.2);
+  addVehicle(makeCar(0xC0562F), 6, 0.9, 1, 2.1);
+
+  // lane B: moving traffic heading the other way
+  addVehicle(makeTruck(), 10, 3.6, -1, 1.25);
+  addVehicle(makeCar(0x3a4270), 3, 3.6, -1, 2.0);
+  addVehicle(makeCar(0x50597e), -6, 3.6, -1, 1.9);
+
+  // lane C: stopped traffic — the ambulance is boxed in, directly beneath Station A's lift
+  var ambulanceMesh = makeAmbulance();
+  addVehicle(makeCar(0x7a5a3a), -12.6, -3.0, 1, 0);
+  addVehicle(makeCar(0x50597e), -10.8, -3.0, 1, 0);
+  addVehicle(ambulanceMesh, -9.0, -3.0, 1, 0);
+  addVehicle(makeCar(0x2c3358), -7.2, -3.0, 1, 0);
+  addVehicle(makeCar(0xC0562F), -5.4, -3.0, 1, 0);
+
+  var VBOUND = 13;
+  function wrapVehicle(v){
+    if(v.speed <= 0) return;
+    if(v.dir > 0 && v.mesh.position.x > VBOUND) v.mesh.position.x = -VBOUND;
+    if(v.dir < 0 && v.mesh.position.x < -VBOUND) v.mesh.position.x = VBOUND;
+  }
+
+  // ---------- traffic lights: this is why one lane is stopped and the other flows ----------
+  function makeTrafficLight(x, z, active){
+    var g = new THREE.Group();
+    var pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.07, 0.07, 2.8, 8),
+      new THREE.MeshStandardMaterial({color:COL.steelDark})
+    );
+    pole.position.y = 1.4;
+    g.add(pole);
+    var housing = new THREE.Mesh(
+      new THREE.BoxGeometry(0.26, 0.62, 0.24),
+      new THREE.MeshStandardMaterial({color:0x1c1f2e})
+    );
+    housing.position.y = 3.0;
+    g.add(housing);
+    var lampColors = {red:0xff3b3b, yellow:0xf5c542, green:0x3ddc6a};
+    ['red','yellow','green'].forEach(function(key, i){
+      var lit = (key === active);
+      var lamp = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.08, 0.08, 0.06, 12),
+        new THREE.MeshStandardMaterial({
+          color: lit ? lampColors[key] : 0x2a2d3a,
+          emissive: lit ? lampColors[key] : 0x000000,
+          emissiveIntensity: lit ? 1 : 0
+        })
+      );
+      lamp.rotation.x = Math.PI/2;
+      lamp.position.set(0, 3.22 - i*0.2, 0.13);
+      g.add(lamp);
+    });
+    g.position.set(x, 0, z);
+    rig.add(g);
+  }
+  makeTrafficLight(-4.0, -4.3, 'red');
+  makeTrafficLight(-11, 1.9, 'green');
+
+
+  // ---------- stations: every pillar gets its own lift ----------
+  function makeElevatorCar(){
+    var g = new THREE.Group();
+    var platform = new THREE.Mesh(
+      new THREE.BoxGeometry(0.42, 0.05, 0.42),
+      new THREE.MeshStandardMaterial({color:COL.cloud, roughness:0.6})
+    );
+    g.add(platform);
+
+    // a permanent stretcher/bed fixture on the platform, so it reads as a medical lift even when idle
+    var bedMat = new THREE.MeshStandardMaterial({color:0xD8DCE6});
+    var bedBase = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.03, 0.16), bedMat);
+    bedBase.position.set(0, 0.055, 0);
+    g.add(bedBase);
+    var bedBlanket = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.045, 0.14), new THREE.MeshStandardMaterial({color:0x4d7fd6}));
+    bedBlanket.position.set(-0.02, 0.08, 0);
+    g.add(bedBlanket);
+
+    var postMat = new THREE.MeshStandardMaterial({color:COL.steel, metalness:0.4, roughness:0.4});
+    var postGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.5, 6);
+    [[-0.18,-0.18],[-0.18,0.18],[0.18,-0.18],[0.18,0.18]].forEach(function(p){
+      var post = new THREE.Mesh(postGeo, postMat);
+      post.position.set(p[0], 0.25, p[1]);
+      g.add(post);
+    });
+    var railGeoX = new THREE.BoxGeometry(0.4, 0.02, 0.02);
+    [-0.18, 0.18].forEach(function(zPos){
+      var rail = new THREE.Mesh(railGeoX, postMat);
+      rail.position.set(0, 0.48, zPos);
+      g.add(rail);
+    });
+    var railGeoZ = new THREE.BoxGeometry(0.02, 0.02, 0.4);
+    [-0.18, 0.18].forEach(function(xPos){
+      var rail = new THREE.Mesh(railGeoZ, postMat);
+      rail.position.set(xPos, 0.48, 0);
+      g.add(rail);
+    });
+    return g;
+  }
+
+  function makeStation(x, phase){
+    var g = new THREE.Group();
+    var pole = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.22, 0.32, 5.6, 12),
+      new THREE.MeshStandardMaterial({color:COL.steel, metalness:0.3, roughness:0.5})
+    );
+    pole.position.y = 2.8;
+    g.add(pole);
+    var panel = new THREE.Mesh(
+      new THREE.BoxGeometry(2.0, 0.08, 1.1),
+      new THREE.MeshStandardMaterial({color:0x1c2340, metalness:0.4, roughness:0.3, emissive:COL.amber, emissiveIntensity:0.12})
+    );
+    panel.position.set(0, 5.55, 0);
+    panel.rotation.x = -0.25;
+    g.add(panel);
+    var cap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.30, 0.30, 0.24, 12),
+      new THREE.MeshStandardMaterial({color:COL.steelDark})
+    );
+    cap.position.y = 5.42;
+    g.add(cap);
+    var shaft = new THREE.Mesh(
+      new THREE.BoxGeometry(0.65, 5.0, 0.65),
+      new THREE.MeshStandardMaterial({color:0x232a4d, transparent:true, opacity:0.35})
+    );
+    shaft.position.set(0.68, 2.5, 0);
+    g.add(shaft);
+    var platform = new THREE.Mesh(
+      new THREE.BoxGeometry(0.9, 0.07, 0.9),
+      new THREE.MeshStandardMaterial({color:COL.cloud})
+    );
+    platform.position.set(0.68, 5.05, 0);
+    g.add(platform);
+
+    // a wider paved area around the pole, set back from the road
+    var basePad = new THREE.Mesh(
+      new THREE.BoxGeometry(3.4, 0.1, 1.8),
+      new THREE.MeshStandardMaterial({color:0x2b3358, roughness:0.9})
+    );
+    basePad.position.set(0.2, 0.05, -1.0);
+    g.add(basePad);
+
+    // a waiting bench for patients/family
+    var benchMat = new THREE.MeshStandardMaterial({color:COL.steelDark});
+    var benchSeat = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.08, 0.4), benchMat);
+    benchSeat.position.set(-0.8, 0.34, -1.1);
+    g.add(benchSeat);
+    var benchBack = new THREE.Mesh(new THREE.BoxGeometry(1.1, 0.35, 0.06), benchMat);
+    benchBack.position.set(-0.8, 0.52, -1.28);
+    g.add(benchBack);
+    var legMat = new THREE.MeshStandardMaterial({color:COL.steel});
+    var benchLeg1 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.28, 6), legMat);
+    benchLeg1.position.set(-1.25, 0.2, -0.95);
+    g.add(benchLeg1);
+    var benchLeg2 = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.28, 6), legMat);
+    benchLeg2.position.set(-0.35, 0.2, -0.95);
+    g.add(benchLeg2);
+
+    g.position.x = x;
+    rig.add(g);
+
+    var elevCar = makeElevatorCar();
+    rig.add(elevCar);
+
+    return {x: x, elevCar: elevCar, phase: phase};
+  }
+
+  var STATIONS_X = [-9, -3, 3, 9];
+  var stations = STATIONS_X.map(function(x, i){
+    var st = makeStation(x, i*1.3);
+    st.liftState = 'idle';
+    st.liftProgress = 0;
+    st.liftPause = 0;
+    st.liftBtn = null;
+    return st;
+  });
+  var hospitalX = STATIONS_X[3];
+
+  // ---------- hospital building ----------
+  var hospital = new THREE.Group();
+  var hBuilding = new THREE.Mesh(
+    new THREE.BoxGeometry(2.6, 5.5, 2.2),
+    new THREE.MeshStandardMaterial({color:0xDCE1EA, roughness:0.8})
+  );
+  hBuilding.position.y = 2.75;
+  hospital.add(hBuilding);
+  var hCanopy = new THREE.Mesh(
+    new THREE.BoxGeometry(1.6, 0.1, 1.0),
+    new THREE.MeshStandardMaterial({color:COL.amber})
+  );
+  hCanopy.position.set(0, 1.0, 1.15);
+  hospital.add(hCanopy);
+  var crossMatH = new THREE.MeshStandardMaterial({color:0xD64545, emissive:0xD64545, emissiveIntensity:0.3});
+  function addHospitalCross(x, y, z, rotY){
+    var cg = new THREE.Group();
+    var cv = new THREE.Mesh(new THREE.BoxGeometry(0.18, 0.66, 0.06), crossMatH);
+    var ch = new THREE.Mesh(new THREE.BoxGeometry(0.66, 0.18, 0.06), crossMatH);
+    cg.add(cv); cg.add(ch);
+    cg.position.set(x, y, z);
+    cg.rotation.y = rotY;
+    hospital.add(cg);
+  }
+  addHospitalCross(0, 4.2, 1.13, 0);       // front
+  addHospitalCross(0, 4.2, -1.13, 0);      // back
+  addHospitalCross(1.33, 4.2, 0, Math.PI/2);  // right
+  addHospitalCross(-1.33, 4.2, 0, Math.PI/2); // left
+  hospital.position.set(hospitalX + 2.2, 0, -2.4);
+  rig.add(hospital);
+
+  // ---------- cable across all four stations ----------
+  var cablePts = [
+    new THREE.Vector3(-9, 5.35, 0),
+    new THREE.Vector3(-6, 5.12, 0),
+    new THREE.Vector3(-3, 5.35, 0),
+    new THREE.Vector3(0, 5.12, 0),
+    new THREE.Vector3(3, 5.35, 0),
+    new THREE.Vector3(6, 5.12, 0),
+    new THREE.Vector3(9, 5.35, 0)
+  ];
+  var cableCurve = new THREE.CatmullRomCurve3(cablePts);
+  var cableGeo = new THREE.TubeGeometry(cableCurve, 100, 0.025, 6, false);
+  var cableMesh = new THREE.Mesh(cableGeo, new THREE.MeshStandardMaterial({color:COL.steelDark}));
+  rig.add(cableMesh);
+
+  // find each station's position along the curve (0 to 1), by sampling
+  stations.forEach(function(st){
+    var bestT = 0, bestDist = Infinity;
+    for(var i=0;i<=300;i++){
+      var sampleT = i/300;
+      var pt = cableCurve.getPointAt(Math.min(Math.max(sampleT,0.001),0.999));
+      var d = Math.abs(pt.x - st.x);
+      if(d < bestDist){ bestDist = d; bestT = sampleT; }
+    }
+    st.t = bestT;
+  });
+
+  // ---------- cabin: rounded aerodynamic pod, same livery as before ----------
+  function makeCabin(){
+    var g = new THREE.Group();
+    var body = new THREE.Mesh(
+      new THREE.SphereGeometry(0.34, 18, 12),
+      new THREE.MeshStandardMaterial({color:COL.cloud, roughness:0.25, transparent:true, opacity:0.38})
+    );
+    body.scale.set(1.55, 0.82, 0.92);
+    body.position.y = -0.34;
+    g.add(body);
+
+    // interior, visible through the glass hull: bed, oxygen cylinder, basic monitor
+    var bed = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.035, 0.15),
+      new THREE.MeshStandardMaterial({color:0xD8DCE6})
+    );
+    bed.position.set(0.02, -0.37, 0);
+    g.add(bed);
+
+    var oxygenTank = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.035, 0.035, 0.22, 10),
+      new THREE.MeshStandardMaterial({color:0xEDEFF4, metalness:0.3, roughness:0.4})
+    );
+    oxygenTank.position.set(-0.26, -0.30, 0.09);
+    g.add(oxygenTank);
+    var oxygenCap = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.018, 0.032, 0.03, 10),
+      new THREE.MeshStandardMaterial({color:0x3ddc6a})
+    );
+    oxygenCap.position.set(-0.26, -0.19, 0.09);
+    g.add(oxygenCap);
+
+    var monitor = new THREE.Mesh(
+      new THREE.BoxGeometry(0.1, 0.11, 0.03),
+      new THREE.MeshStandardMaterial({color:0x1a2036})
+    );
+    monitor.position.set(-0.22, -0.24, -0.10);
+    g.add(monitor);
+    var monitorScreen = new THREE.Mesh(
+      new THREE.PlaneGeometry(0.07, 0.06),
+      new THREE.MeshStandardMaterial({color:0x3ddc6a, emissive:0x3ddc6a, emissiveIntensity:0.6})
+    );
+    monitorScreen.position.set(-0.22, -0.24, -0.084);
+    g.add(monitorScreen);
+
+    var stripe = new THREE.Mesh(
+      new THREE.BoxGeometry(0.98, 0.1, 0.62),
+      new THREE.MeshStandardMaterial({color:COL.amber})
+    );
+    stripe.position.set(0, -0.42, 0);
+    g.add(stripe);
+
+    var winMat = new THREE.MeshStandardMaterial({color:0x1a2036});
+    var win1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.16, 0.02), winMat);
+    win1.position.set(0.34, -0.28, 0.31);
+    g.add(win1);
+    var win2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.16, 0.02), winMat);
+    win2.position.set(0.34, -0.28, -0.31);
+    g.add(win2);
+
+    var nose = new THREE.Mesh(
+      new THREE.ConeGeometry(0.16, 0.28, 10),
+      new THREE.MeshStandardMaterial({color:COL.coral})
+    );
+    nose.rotation.z = -Math.PI/2;
+    nose.position.set(0.56, -0.34, 0);
+    g.add(nose);
+
+    var panel = new THREE.Mesh(
+      new THREE.BoxGeometry(0.7, 0.04, 0.5),
+      new THREE.MeshStandardMaterial({color:0x1c2340, emissive:COL.amber, emissiveIntensity:0.12})
+    );
+    panel.position.set(-0.08, -0.05, 0);
+    panel.rotation.x = -0.15;
+    g.add(panel);
+
+    var crossMat = new THREE.MeshStandardMaterial({color:COL.coral, emissive:COL.coral, emissiveIntensity:0.3});
+    var cv = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.22, 0.04), crossMat);
+    cv.position.set(-0.15, -0.34, 0.34);
+    g.add(cv);
+    var ch = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.06, 0.04), crossMat);
+    ch.position.set(-0.15, -0.34, 0.34);
+    g.add(ch);
+
+    var hanger = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.02, 0.02, 0.3, 6),
+      new THREE.MeshStandardMaterial({color:COL.steel})
+    );
+    hanger.position.y = -0.15;
+    g.add(hanger);
+
+    // EV battery pack, mounted on the roof behind the solar panel
+    var battery = new THREE.Mesh(
+      new THREE.BoxGeometry(0.3, 0.13, 0.24),
+      new THREE.MeshStandardMaterial({color:0x2f7d5c, roughness:0.4})
+    );
+    battery.position.set(-0.34, -0.07, 0);
+    g.add(battery);
+    var batteryLed = new THREE.Mesh(
+      new THREE.BoxGeometry(0.05, 0.03, 0.03),
+      new THREE.MeshStandardMaterial({color:0x8CFCA6, emissive:0x8CFCA6, emissiveIntensity:0.7})
+    );
+    batteryLed.position.set(-0.34, -0.005, 0.13);
+    g.add(batteryLed);
+
+    return g;
+  }
+  var cabin = makeCabin();
+  rig.add(cabin);
+
+  // ---------- the patient: a small figure on a stretcher, visible through the whole journey ----------
+  function makePatient(){
+    var g = new THREE.Group();
+    var stretcher = new THREE.Mesh(
+      new THREE.BoxGeometry(0.46, 0.035, 0.2),
+      new THREE.MeshStandardMaterial({color:0xEDEFF4})
+    );
+    g.add(stretcher);
+    var blanket = new THREE.Mesh(
+      new THREE.BoxGeometry(0.34, 0.06, 0.17),
+      new THREE.MeshStandardMaterial({color:COL.amber, emissive:COL.amber, emissiveIntensity:0.25})
+    );
+    blanket.position.set(-0.03, 0.045, 0);
+    g.add(blanket);
+    var head = new THREE.Mesh(
+      new THREE.SphereGeometry(0.055, 10, 8),
+      new THREE.MeshStandardMaterial({color:0xE0B99A})
+    );
+    head.position.set(0.19, 0.06, 0);
+    g.add(head);
+    // a bright pulsing beacon above the patient, so it reads clearly at any distance
+    var beacon = new THREE.Mesh(
+      new THREE.SphereGeometry(0.05, 10, 8),
+      new THREE.MeshBasicMaterial({color:COL.amber, transparent:true, opacity:0.9})
+    );
+    beacon.position.set(0, 0.35, 0);
+    g.add(beacon);
+    g.userData.beacon = beacon;
+    g.scale.set(1.8, 1.8, 1.8);
+    return g;
+  }
+  var patientMesh = makePatient();
+  patientMesh.visible = false;
+  rig.add(patientMesh);
+
+  // ---------- sun ----------
+  var sunMesh = new THREE.Mesh(new THREE.SphereGeometry(0.5, 16, 16), new THREE.MeshBasicMaterial({color:0xffd9a0, transparent:true, opacity:0.9}));
+  sunMesh.position.set(7, 7.5, -7);
+  rig.add(sunMesh);
+  var sunGlow = new THREE.Mesh(new THREE.SphereGeometry(1.1, 16, 16), new THREE.MeshBasicMaterial({color:0xffbb66, transparent:true, opacity:0.18}));
+  sunGlow.position.copy(sunMesh.position);
+  rig.add(sunGlow);
+  var flareStreak = new THREE.Mesh(
+    new THREE.PlaneGeometry(4.5, 0.05),
+    new THREE.MeshBasicMaterial({color:0xffe6bf, transparent:true, opacity:0.22, side:THREE.DoubleSide, depthWrite:false})
+  );
+  flareStreak.position.copy(sunMesh.position);
+  rig.add(flareStreak);
+  var flareStreak2 = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.05, 4.5),
+    new THREE.MeshBasicMaterial({color:0xffe6bf, transparent:true, opacity:0.12, side:THREE.DoubleSide, depthWrite:false})
+  );
+  flareStreak2.position.copy(sunMesh.position);
+  rig.add(flareStreak2);
+
+  // ---------- stars ----------
+  var starCount = window.innerWidth < 600 ? 60 : 150;
+  var starPos = new Float32Array(starCount*3);
+  for(var s=0;s<starCount;s++){
+    starPos[s*3] = (Math.random()-0.5)*26;
+    starPos[s*3+1] = 5 + Math.random()*6;
+    starPos[s*3+2] = (Math.random()-0.5)*-10 - 2;
+  }
+  var starGeo = new THREE.BufferGeometry();
+  starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+  var stars = new THREE.Points(starGeo, new THREE.PointsMaterial({color:0xffffff, size:0.03, transparent:true, opacity:0.6}));
+  rig.add(stars);
+
+  // ---------- drag to rotate ----------
+  var isDragging = false, lastX = 0, rotY = 0.32;
+  var autoRotate = !prefersReduced;
+  canvas.addEventListener('pointerdown', function(e){ isDragging = true; lastX = e.clientX; });
+  window.addEventListener('pointermove', function(e){
+    if(!isDragging) return;
+    var dx = e.clientX - lastX; lastX = e.clientX;
+    rotY += dx*0.005;
+  });
+  window.addEventListener('pointerup', function(){ isDragging = false; });
+  canvas.style.touchAction = 'pan-y';
+
+  function resize(){
+    var w = wrap.clientWidth, h = wrap.clientHeight;
+    if(w === 0 || h === 0) return;
+    camera.aspect = w/h;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w, h);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  // ---------- speed control ----------
+  var speedKmh = 50;
+  var slider = document.getElementById('speed-slider');
+  var sliderValue = document.getElementById('speed-slider-value');
+  var hudValue = document.getElementById('speed-readout');
+  function setSpeed(v){
+    speedKmh = v;
+    if(sliderValue) sliderValue.textContent = v + ' km/h';
+    if(hudValue) hudValue.innerHTML = v + '<span>km/h</span>';
+  }
+  if(slider){
+    setSpeed(parseInt(slider.value, 10) || 50);
+    slider.addEventListener('input', function(){ setSpeed(parseInt(slider.value, 10)); });
+  }
+
+  // ---------- emergency dispatch: the cabin only travels when a station calls it ----------
+  var STATION_NAMES = ['Station A', 'Intermediate 1', 'Intermediate 2', 'Hospital station'];
+  var dispatchState = 'idle'; // idle | toStation | atStation | toHospital | toHospitalDirect | arrived | returning
+  var currentT = stations[0].t;
+  var targetT = stations[0].t;
+  var moveDir = 1;
+  var pauseTimer = 0;
+  var tourRunning = false;
+  var tourIdx = 0;
+  var pendingTourAdvance = false;
+  var closeUpEye = null, closeUpTarget = null, closeUpUntil = 0;
+  var activeStationIdx = 0;
+  var patientManualPos = null;
+  var patientInCabin = false;
+  var patientOnHospitalLift = false;
+  var elapsed = 0;
+
+  var captionEl = document.getElementById('scene-caption');
+  var dispatchButtons = Array.prototype.slice.call(document.querySelectorAll('[data-station]'));
+  var cancelBtn = document.getElementById('cancel-dispatch');
+  var tourBtn = document.getElementById('tour-btn');
+
+  if(dispatchButtons.length < 4 || !cancelBtn || !tourBtn){
+    if(captionEl) captionEl.textContent = 'Setup problem: only found ' + dispatchButtons.length + ' of 4 dispatch buttons on the page. The buttons will not respond until this is fixed.';
+  }
+
+  function setStatus(text){ if(captionEl) captionEl.textContent = text; }
+  function setButtonsEnabled(enabled){
+    dispatchButtons.forEach(function(b){ b.disabled = !enabled; });
+    if(cancelBtn) cancelBtn.disabled = enabled && !tourRunning;
+    if(tourBtn) tourBtn.disabled = !enabled;
+  }
+
+  function stationCloseUp(st){
+    return {
+      eye: new THREE.Vector3(st.x + 1.6, 4.3, 6.5),
+      target: new THREE.Vector3(st.x, 3.0, -0.5)
+    };
+  }
+
+  function advanceState(){
+    if(dispatchState === 'toStation'){
+      dispatchState = 'atStation';
+      pauseTimer = 1.2;
+      setStatus('Picking up the patient...');
+    } else if(dispatchState === 'toHospital'){
+      dispatchState = 'arrived';
+      pauseTimer = 2.0;
+      setStatus('Arrived — transferring to the hospital lift.');
+      var hSt = stations[3];
+      hSt.liftState = 'at-top';
+      hSt.liftProgress = 1;
+      hSt.liftPause = 0.8;
+      hSt.liftBtn = null;
+      patientOnHospitalLift = true;
+    } else if(dispatchState === 'toHospitalDirect'){
+      dispatchState = 'arrived';
+      pauseTimer = 2.0;
+      setStatus('Arrived at the hospital.');
+    } else if(dispatchState === 'returning'){
+      dispatchState = 'idle';
+      if(pendingTourAdvance){
+        pendingTourAdvance = false;
+        runTourStep();
+      } else {
+        setStatus('Cabin back at Station A — the nearest station to the ambulance, ready for the next call.');
+        setButtonsEnabled(true);
+      }
+    }
+  }
+
+  function dispatchTo(idx){
+    targetT = stations[idx].t;
+    if(idx === 3){
+      dispatchState = 'toHospitalDirect';
+      setStatus('Cabin dispatched straight to the hospital station.');
+    } else {
+      dispatchState = 'toStation';
+      activeStationIdx = idx;
+      var callSt = stations[idx];
+      if(callSt.liftState === 'idle'){
+        callSt.liftState = 'going-up';
+        callSt.liftBtn = null;
+      }
+      setStatus('Emergency at ' + STATION_NAMES[idx] + ' — cabin dispatched.');
+    }
+    setButtonsEnabled(false);
+    if(Math.abs(targetT - currentT) <= 0.0005) advanceState();
+  }
+
+  dispatchButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(dispatchState !== 'idle') return;
+      dispatchTo(parseInt(btn.getAttribute('data-station'), 10));
+    });
+  });
+
+  if(cancelBtn){
+    cancelBtn.addEventListener('click', function(){
+      if(dispatchState === 'idle' && !tourRunning) return;
+      tourRunning = false;
+      pendingTourAdvance = false;
+      closeUpUntil = 0;
+      patientManualPos = null;
+      if(dispatchState !== 'idle'){
+        targetT = stations[0].t;
+        dispatchState = 'returning';
+        pauseTimer = 0;
+        if(Math.abs(targetT - currentT) <= 0.0005) advanceState();
+      } else {
+        setButtonsEnabled(true);
+      }
+      setStatus('Cancelled — cabin returning to base.');
+    });
+  }
+
+  // hook used by the dispatch console to start the cabin
+  window.AeroMedScene = { dispatchTo: function(i){ if(dispatchState !== 'idle' || tourRunning) return false; dispatchTo(i); return true; } };
+
+  // ---------- call-a-lift: if nothing else is happening, calling a pickup lift starts the full journey;
+  // otherwise (an emergency already in progress, or the hospital lift) it's just a standalone test ----------
+  var liftButtons = Array.prototype.slice.call(document.querySelectorAll('.lift-btn'));
+  liftButtons.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var idx = parseInt(btn.getAttribute('data-lift'), 10);
+      if(dispatchState === 'idle' && idx !== 3){
+        dispatchTo(idx);
+        return;
+      }
+      var st = stations[idx];
+      if(st.liftState !== 'idle') return;
+      st.liftState = 'going-up';
+      st.liftBtn = btn;
+      btn.disabled = true;
+      var cu = stationCloseUp(st);
+      closeUpEye = cu.eye;
+      closeUpTarget = cu.target;
+      closeUpUntil = elapsed + 4.5;
+    });
+  });
+
+  // ---------- guided tutorial: a short scripted tour of the system ----------
+  var TOUR_STEPS = [
+    {type:'caption', text:'AeroMed: a solar-powered line that carries patients above traffic.', hold:2200},
+    {type:'closeup-ambulance', text:'GPS pinpoints the ambulance — stuck in traffic, every minute costing the patient.', hold:3200},
+    {type:'lift-transfer', station:0, text:'Station A is the nearest match — the lift brings the patient straight up to the platform.', hold:3200},
+    {type:'dispatch', station:0, text:'From there, the cabin takes over — carrying the patient above the traffic below.'},
+    {type:'closeup-hospital', text:'At the hospital, the cross is visible from every side, with its own lift to the entrance.', hold:3800},
+    {type:'caption', text:'That is AeroMed — pickup to hospital, without touching road traffic.', hold:3000}
+  ];
+
+  function runTourStep(){
+    if(!tourRunning) return;
+    if(tourIdx >= TOUR_STEPS.length){
+      tourRunning = false;
+      closeUpUntil = 0;
+      setStatus('Tutorial complete. Cabin ready and waiting at Station A.');
+      setButtonsEnabled(true);
+      return;
+    }
+    var step = TOUR_STEPS[tourIdx];
+    tourIdx++;
+    if(step.type === 'caption'){
+      setStatus(step.text);
+      setTimeout(runTourStep, step.hold);
+    } else if(step.type === 'closeup-ambulance'){
+      ambulanceMesh.getWorldPosition(_tourPos);
+      closeUpEye = new THREE.Vector3(_tourPos.x + 2.2, 2.6, _tourPos.z + 4.5);
+      closeUpTarget = new THREE.Vector3(_tourPos.x, 0.6, _tourPos.z);
+      closeUpUntil = elapsed + step.hold/1000 + 0.5;
+      patientManualPos = new THREE.Vector3(_tourPos.x - 0.3, 0.34, _tourPos.z);
+      setStatus(step.text);
+      setTimeout(runTourStep, step.hold);
+    } else if(step.type === 'lift-transfer'){
+      var liftSt = stations[step.station];
+      var lcu = stationCloseUp(liftSt);
+      closeUpEye = lcu.eye;
+      closeUpTarget = lcu.target;
+      closeUpUntil = elapsed + step.hold/1000 + 0.5;
+      patientManualPos = null;
+      if(liftSt.liftState === 'idle'){
+        liftSt.liftState = 'going-up';
+        liftSt.liftBtn = null;
+      }
+      setStatus(step.text);
+      setTimeout(runTourStep, step.hold);
+    } else if(step.type === 'closeup'){
+      var cu = stationCloseUp(stations[step.station]);
+      closeUpEye = cu.eye;
+      closeUpTarget = cu.target;
+      closeUpUntil = elapsed + step.hold/1000 + 0.5;
+      setStatus(step.text);
+      setTimeout(runTourStep, step.hold);
+    } else if(step.type === 'closeup-hospital'){
+      closeUpEye = new THREE.Vector3(hospital.position.x + 5, 4.5, hospital.position.z + 5.5);
+      closeUpTarget = new THREE.Vector3(hospital.position.x, 3.2, hospital.position.z);
+      closeUpUntil = elapsed + step.hold/1000 + 0.5;
+      setStatus(step.text);
+      setTimeout(runTourStep, step.hold);
+    } else if(step.type === 'dispatch'){
+      setStatus(step.text);
+      setTimeout(function(){
+        pendingTourAdvance = true;
+        dispatchTo(step.station);
+      }, 1200);
+    }
+  }
+
+  if(tourBtn){
+    tourBtn.addEventListener('click', function(){
+      if(dispatchState !== 'idle' || tourRunning) return;
+      tourRunning = true;
+      tourIdx = 0;
+      setButtonsEnabled(false);
+      runTourStep();
+    });
+  }
+
+  var clock = new THREE.Clock();
+  var _worldPos = new THREE.Vector3();
+  var _tourPos = new THREE.Vector3();
+
+  function animate(){
+    requestAnimationFrame(animate);
+    var dt = Math.min(clock.getDelta(), 0.05);
+    elapsed += dt;
+
+    if(!isDragging && autoRotate) rotY += 0.0012;
+    rig.rotation.y += (rotY - rig.rotation.y) * 0.08;
+
+    // cabin only moves when dispatched; speed comes from the slider
+    var tSpeed = speedKmh * 0.004;
+    if(Math.abs(targetT - currentT) > 0.0005){
+      moveDir = targetT > currentT ? 1 : -1;
+      currentT += moveDir * tSpeed * dt;
+      if((moveDir > 0 && currentT >= targetT) || (moveDir < 0 && currentT <= targetT)){
+        currentT = targetT;
+        advanceState();
+      }
+    } else if(pauseTimer > 0){
+      pauseTimer -= dt;
+      if(pauseTimer <= 0){
+        if(dispatchState === 'atStation'){
+          targetT = stations[3].t;
+          dispatchState = 'toHospital';
+          setStatus('Cabin en route to the hospital.');
+          if(Math.abs(targetT - currentT) <= 0.0005) advanceState();
+        } else if(dispatchState === 'arrived'){
+          targetT = stations[0].t;
+          dispatchState = 'returning';
+          setStatus('Cabin returning to base.');
+          if(Math.abs(targetT - currentT) <= 0.0005) advanceState();
+        }
+      }
+    }
+
+    var tt = Math.min(Math.max(currentT, 0.001), 0.999);
+    var p = cableCurve.getPointAt(tt);
+    cabin.position.copy(p);
+    var tangent = cableCurve.getTangentAt(tt);
+    cabin.rotation.z = Math.atan2(tangent.y*moveDir, tangent.x*moveDir);
+    cabin.updateMatrixWorld(true);
+
+    // every station's lift sits idle until called, then goes up, pauses, and comes back down
+    stations.forEach(function(st){
+      var liftSpeed = 0.5;
+      if(st.liftState === 'going-up'){
+        st.liftProgress = Math.min(1, st.liftProgress + liftSpeed*dt);
+        if(st.liftProgress >= 1){ st.liftState = 'at-top'; st.liftPause = 1.0; }
+      } else if(st.liftState === 'at-top'){
+        st.liftPause -= dt;
+        if(st.liftPause <= 0) st.liftState = 'coming-down';
+      } else if(st.liftState === 'coming-down'){
+        st.liftProgress = Math.max(0, st.liftProgress - liftSpeed*dt);
+        if(st.liftProgress <= 0){
+          st.liftState = 'idle';
+          if(st.liftBtn) st.liftBtn.disabled = false;
+        }
+      }
+      st.elevCar.position.set(st.x + 0.68, 0.4 + st.liftProgress*4.65, 0);
+    });
+
+    // the patient: rides the lift up, then travels with the cabin, then down the hospital lift, then delivered
+    var activeSt = stations[activeStationIdx];
+    if(patientOnHospitalLift){
+      var hospSt = stations[3];
+      if(hospSt.liftState === 'idle'){
+        patientOnHospitalLift = false;
+        patientMesh.visible = false;
+      } else {
+        if(patientInCabin){ cabin.remove(patientMesh); rig.add(patientMesh); patientInCabin = false; }
+        patientMesh.visible = true;
+        patientMesh.position.set(hospSt.elevCar.position.x, hospSt.elevCar.position.y + 0.05, hospSt.elevCar.position.z);
+        patientMesh.rotation.set(0, 0, 0);
+      }
+    } else if(patientManualPos){
+      if(patientInCabin){ cabin.remove(patientMesh); patientInCabin = false; }
+      rig.add(patientMesh);
+      patientMesh.visible = true;
+      patientMesh.position.copy(patientManualPos);
+      patientMesh.rotation.set(0, 0, 0);
+    } else if(dispatchState === 'toHospitalDirect' || dispatchState === 'returning'){
+      if(patientInCabin){ cabin.remove(patientMesh); rig.add(patientMesh); patientInCabin = false; }
+      patientMesh.visible = false;
+    } else if(dispatchState === 'atStation' || dispatchState === 'toHospital' || dispatchState === 'arrived'){
+      // the patient becomes part of the cabin itself,
+      // so it moves and tilts with it exactly, with no manual syncing to drift out of place
+      if(!patientInCabin){
+        cabin.add(patientMesh);
+        patientMesh.position.set(0, -0.335, 0);
+        patientMesh.rotation.set(0, 0, 0);
+        patientInCabin = true;
+      }
+      patientMesh.visible = true;
+    } else if(activeSt.liftState === 'going-up' || activeSt.liftState === 'at-top'){
+      // any lift actively running shows a patient riding it — whether that's part of a real
+      // dispatch, or just testing a lift on its own with the "Call a lift" buttons
+      if(patientInCabin){ cabin.remove(patientMesh); rig.add(patientMesh); patientInCabin = false; }
+      patientMesh.visible = true;
+      patientMesh.position.set(activeSt.elevCar.position.x, activeSt.elevCar.position.y + 0.05, activeSt.elevCar.position.z);
+      patientMesh.rotation.set(0, 0, 0);
+    } else if(dispatchState === 'toStation'){
+      if(patientInCabin){ cabin.remove(patientMesh); rig.add(patientMesh); patientInCabin = false; }
+      patientMesh.visible = true;
+      patientMesh.position.set(activeSt.x + 0.68, 5.10, 0);
+      patientMesh.rotation.set(0, 0, 0);
+    } else {
+      if(patientInCabin){ cabin.remove(patientMesh); rig.add(patientMesh); patientInCabin = false; }
+      patientMesh.visible = false;
+    }
+
+    // moving traffic
+    vehicles.forEach(function(v){
+      v.mesh.position.x += v.dir * v.speed * dt;
+      wrapVehicle(v);
+    });
+
+    // the stuck ambulance's light bar keeps flashing
+    if(ambulanceMesh.userData.lights){
+      var flash = Math.floor(elapsed*1.6) % 2 === 0;
+      ambulanceMesh.userData.lights[0].material.emissiveIntensity = flash ? 1.0 : 0.15;
+      ambulanceMesh.userData.lights[1].material.emissiveIntensity = flash ? 0.15 : 1.0;
+    }
+
+    sunGlow.material.opacity = 0.14 + Math.sin(elapsed*0.6)*0.04;
+    if(patientMesh.userData.beacon){
+      var beaconPulse = 0.6 + Math.sin(elapsed*4)*0.4;
+      patientMesh.userData.beacon.material.opacity = Math.max(0.2, beaconPulse);
+    }
+    flareStreak.material.opacity = 0.16 + Math.sin(elapsed*0.6)*0.06;
+    flareStreak2.material.opacity = 0.08 + Math.sin(elapsed*0.6)*0.04;
+
+    // cinematic camera: wide by default, tracks the cabin in transit, closes in when called
+    var desiredEye, desiredTarget, desiredFov;
+    if(closeUpEye && elapsed < closeUpUntil){
+      desiredEye = closeUpEye;
+      desiredTarget = closeUpTarget;
+      desiredFov = 40;
+    } else if(dispatchState !== 'idle'){
+      cabin.getWorldPosition(_worldPos);
+      desiredTarget = _worldPos;
+      var driftAngle = Math.sin(elapsed*0.18) * 0.5;
+      var driftHeight = Math.sin(elapsed*0.11) * 0.5;
+      desiredEye = new THREE.Vector3(
+        _worldPos.x + Math.sin(driftAngle) * 3.2,
+        _worldPos.y + 2.3 + driftHeight,
+        _worldPos.z + Math.cos(driftAngle) * 7.2
+      );
+      desiredFov = 42;
+    } else {
+      desiredEye = defaultEye;
+      desiredTarget = defaultTarget;
+      desiredFov = 45;
+    }
+    var camEase = Math.min(1, dt*1.4);
+    camEyePos.lerp(desiredEye, camEase);
+    camTargetPos.lerp(desiredTarget, camEase);
+    camera.fov += (desiredFov - camera.fov) * camEase;
+    camera.updateProjectionMatrix();
+    camera.position.copy(camEyePos);
+    camera.lookAt(camTargetPos);
+
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  } catch(err){
+    var errMsg = document.createElement('div');
+    errMsg.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;text-align:center;font-family:sans-serif;font-size:0.8rem;color:#EDEFF4;opacity:0.85;';
+    errMsg.textContent = '3D preview hit an error: ' + (err && err.message ? err.message : err);
+    wrap.appendChild(errMsg);
+    if(window.console && console.error) console.error('AeroMed hero scene error:', err);
+  }
+})();
+
+</script>
+
+<script>
+// ===== Hospital finder: location access, emergency requirements, bed availability =====
+// Runs on its own, separate from the 3D scene above.
+(function(){
+  var chipsEl = document.getElementById('emergency-chips');
+  var resultsEl = document.getElementById('results');
+  var reqEl = document.getElementById('requirements');
+  var locateBtn = document.getElementById('locate-btn');
+  var locStatus = document.getElementById('loc-status');
+  var staleToggle = document.getElementById('stale-toggle');
+  var refreshBtn = document.getElementById('refresh-btn');
+  if(!chipsEl || !resultsEl || !reqEl) return;
+
+  // ---------- facility names shown to the visitor ----------
+  var FAC = {
+    casualty:   '24-hour casualty',
+    icu:        'ICU / critical care',
+    ot:         'Operation theatre',
+    surgery:    'General surgery',
+    ortho:      'Orthopaedics',
+    neuro:      'Neurology / neurosurgery',
+    cardio:     'Cardiology',
+    obstetrics: 'Obstetrics and labour room',
+    nicu:       'Newborn care (NICU)',
+    imaging:    'CT scan',
+    bloodbank:  'Blood bank',
+    ventilator: 'Ventilator support',
+    lab:        'Lab tests'
+  };
+
+  var BED_NAMES = {
+    emergency: 'Emergency beds',
+    icu:       'ICU beds',
+    maternity: 'Maternity beds',
+    general:   'General beds'
+  };
+
+  // ---------- what each emergency needs ----------
+  // must = the hospital should have all of these. nice = helpful extras.
+  // bed = the kind of bed this emergency needs first.
+  var EMERGENCIES = {
+    cardiac: {
+      label: 'Heart attack',
+      must: ['casualty','icu','cardio'],
+      nice: ['lab','ventilator'],
+      bed: 'icu',
+      bedWhy: 'A heart attack patient needs a monitored ICU or cardiac care bed.',
+      cabin: ['Oxygen supply','ECG and heart monitor','Defibrillator','IV access kit','Trained nurse on board'],
+      note: 'Time-critical. Hospitals with a cardiologist on call are the priority.'
+    },
+    trauma: {
+      label: 'Road accident or injury',
+      must: ['casualty','ot','ortho'],
+      nice: ['imaging','bloodbank','icu','surgery'],
+      bed: 'emergency',
+      bedWhy: 'An injured patient needs an emergency bed first, and an operation theatre soon after.',
+      cabin: ['Spinal and limb immobilisation','Bleeding control supplies','Oxygen supply','IV fluids kit','Trained nurse on board'],
+      note: 'Needs surgery and bone care. A blood bank and CT scan help for serious injuries.'
+    },
+    stroke: {
+      label: 'Stroke',
+      must: ['casualty','neuro','imaging'],
+      nice: ['icu','lab'],
+      bed: 'icu',
+      bedWhy: 'A stroke patient needs a monitored ICU or stroke bed.',
+      cabin: ['Oxygen supply','Blood pressure and pulse monitor','Blood sugar check','Trained nurse on board'],
+      note: 'Time-critical. A CT scan and a neurologist are needed to decide treatment.'
+    },
+    delivery: {
+      label: 'Pregnancy or delivery',
+      must: ['obstetrics','ot'],
+      nice: ['nicu','bloodbank','casualty'],
+      bed: 'maternity',
+      bedWhy: 'A mother needs a maternity or labour bed, with an operation theatre ready if a caesarean is needed.',
+      cabin: ['Delivery kit','Oxygen supply','Fetal and maternal monitoring','Trained nurse or midwife on board'],
+      note: 'Newborn care and a blood bank matter if the pregnancy is high-risk.'
+    },
+    breathing: {
+      label: 'Breathing difficulty',
+      must: ['casualty','icu'],
+      nice: ['ventilator','imaging','lab'],
+      bed: 'icu',
+      bedWhy: 'A patient who struggles to breathe may need oxygen support or a ventilator in ICU.',
+      cabin: ['Oxygen supply','Pulse oximeter','Nebuliser','Trained nurse on board'],
+      note: 'Ventilator support is the key extra if breathing gets worse.'
+    }
+  };
+
+  // ---------- HOSPITAL DATA ----------
+  // Locations and phone numbers come from public map listings.
+  // "fac" = facilities seen in public listings and patient reviews. NOT verified.
+  //         Add or remove names from this list after you confirm with the hospital.
+  // "beds" = total beds. These numbers are placeholders for the demo.
+  var HOSPITALS = [
+    { name:'Medicover Hospitals', area:'RTC Complex, Balaji Nagar',
+      lat:18.1073339, lng:83.4013095, phone:'+91 40 6833 4455',
+      fac:['casualty','icu','ot','surgery','ortho','neuro','cardio','imaging','lab'],
+      beds:{emergency:10, icu:31, maternity:6, general:200} },
+    { name:'Srinidhi Medicare, Critical Care and Multi-specialty', area:'Balaji Nagar',
+      lat:18.1057591, lng:83.3989857, phone:'+91 93985 14121',
+      fac:['casualty','icu','ot','surgery','lab'],
+      beds:{emergency:6, icu:8, maternity:0, general:45} },
+    { name:'Queen\u2019s NRI Hospital', area:'Santha Pet',
+      lat:18.1174881, lng:83.4014794, phone:'+91 89222 25177',
+      fac:['casualty','icu','ot','surgery','ortho','neuro','cardio','obstetrics','lab'],
+      beds:{emergency:12, icu:10, maternity:12, general:80} },
+    { name:'Sri Sai Super Specialty Hospital', area:'Tank Bunk Road, Balaji Nagar',
+      lat:18.1080247, lng:83.4014074, phone:'+91 94401 93650',
+      fac:['casualty','ot','ortho','surgery'],
+      beds:{emergency:6, icu:4, maternity:0, general:60} },
+    { name:'Mahendra Hospitals', area:'RCM Church Road',
+      lat:18.1128493, lng:83.3913622, phone:'+91 89771 11311',
+      fac:['casualty','ot','obstetrics','surgery','lab'],
+      beds:{emergency:5, icu:4, maternity:10, general:40} },
+    { name:'Sukhibhava Hospitals', area:'Balaji Junction',
+      lat:18.108433, lng:83.4096482, phone:'+91 79012 24433',
+      fac:['casualty','icu','lab'],
+      beds:{emergency:5, icu:6, maternity:0, general:35} },
+    // ---- REFERRAL HOSPITALS, Visakhapatnam (about 50 km). Used when nearer hospitals lack a needed facility.
+    // Locations from public map listings. Facilities from the hospitals' public pages. Bed counts are placeholders. Confirm all by phone.
+    { name:'Apollo Hospitals, Arilova', area:'Arilova, Visakhapatnam', referral:true,
+      lat:17.71708, lng:83.30921, phone:'1066',
+      fac:['casualty','icu','ot','surgery','ortho','neuro','cardio','obstetrics','imaging','lab'],
+      beds:{emergency:15, icu:40, maternity:20, general:300} },
+    { name:'King George Hospital (KGH)', area:'Maharani Peta, Visakhapatnam', referral:true,
+      lat:17.7082562, lng:83.3056478, phone:'108',
+      fac:['casualty','ot','surgery','ortho','neuro','cardio'],
+      beds:{emergency:30, icu:30, maternity:0, general:1100} }
+  ];
+
+  var DEFAULT_POINT = { lat:18.1067, lng:83.3955, shared:false }; // Vizianagaram city centre
+  var user = { lat:DEFAULT_POINT.lat, lng:DEFAULT_POINT.lng, shared:false };
+  var selected = null;
+  var seed = 7;
+  var STALE_AFTER_MIN = 30;
+
+  // ---------- simulated bed availability ----------
+  function rng(){
+    // small repeatable random number generator, so a given seed always shows the same demo
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    var t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+  function simulate(){
+    var stale = staleToggle && staleToggle.checked;
+    HOSPITALS.forEach(function(h){
+      h.free = {};
+      ['emergency','icu','maternity','general'].forEach(function(k){
+        var total = h.beds[k];
+        if(!total){ h.free[k] = 0; return; }
+        // roughly a quarter of the time a bed type is completely full
+        h.free[k] = rng() < 0.25 ? 0 : Math.floor(rng() * (total * 0.45)) + 1;
+      });
+      h.minsAgo = stale ? Math.round(40 + rng()*50) : Math.round(2 + rng()*24);
+    });
+  }
+
+  // ---------- distance ----------
+  function toRad(d){ return d * Math.PI / 180; }
+  function distKm(lat1, lng1, lat2, lng2){
+    var R = 6371;
+    var dLat = toRad(lat2 - lat1), dLng = toRad(lng2 - lng1);
+    var a = Math.sin(dLat/2)*Math.sin(dLat/2) +
+            Math.cos(toRad(lat1))*Math.cos(toRad(lat2))*Math.sin(dLng/2)*Math.sin(dLng/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  function roadMinutes(km){
+    // estimate: roads are ~40% longer than a straight line in the city (~15% on long trips); ~25 km/h in the city (first 8 km), ~55 km/h beyond
+    var roadKm = km * (km > 10 ? 1.15 : 1.4);
+    var city = Math.min(roadKm, 8);
+    return Math.max(2, Math.round((city / 25 + (roadKm - city) / 55) * 60));
+  }
+
+  // ---------- ranking ----------
+  function evaluate(h, em){
+    var mustHave = em.must.filter(function(f){ return h.fac.indexOf(f) !== -1; });
+    var mustMiss = em.must.filter(function(f){ return h.fac.indexOf(f) === -1; });
+    var niceHave = em.nice.filter(function(f){ return h.fac.indexOf(f) !== -1; });
+    var km = distKm(user.lat, user.lng, h.lat, h.lng);
+    var freeBeds = h.free[em.bed];
+    var stale = h.minsAgo > STALE_AFTER_MIN;
+
+    var score = 0;
+    score += 50 * (mustHave.length / em.must.length);
+    score += 10 * (em.nice.length ? niceHave.length / em.nice.length : 0);
+    score += freeBeds > 0 ? 25 : 0;
+    score += 15 * Math.max(0, 1 - km / 15);
+    if(stale) score -= 8;
+
+    var fit = 'low';
+    if(mustMiss.length === 0 && freeBeds > 0) fit = 'good';
+    else if(mustHave.length > 0) fit = 'part';
+
+    return { h:h, mustHave:mustHave, mustMiss:mustMiss, niceHave:niceHave, km:km,
+             freeBeds:freeBeds, stale:stale, score:score, fit:fit };
+  }
+
+  function names(list){ return list.map(function(f){ return FAC[f].toLowerCase(); }).join(', '); }
+
+  function explain(r, em){
+    var parts = [];
+    if(r.mustMiss.length === 0){
+      parts.push('Has everything this emergency needs: ' + names(r.mustHave) + '.');
+    } else if(r.mustHave.length){
+      parts.push('Has ' + names(r.mustHave) + ', but ' + names(r.mustMiss) + (r.mustMiss.length > 1 ? ' are' : ' is') + ' not listed.');
+    } else {
+      parts.push('None of the key facilities for this emergency are listed.');
+    }
+    var bedName = BED_NAMES[em.bed].toLowerCase();
+    if(r.h.beds[em.bed] === 0){
+      parts.push('No ' + bedName + ' are listed here.');
+    } else if(r.freeBeds > 0){
+      parts.push(r.freeBeds + ' of ' + r.h.beds[em.bed] + ' ' + bedName + ' look free in the simulated data.');
+    } else {
+      parts.push('All ' + bedName + ' look full in the simulated data.');
+    }
+    var mins = roadMinutes(r.km);
+    parts.push('About ' + r.km.toFixed(1) + ' km away, roughly ' + mins + ' min by road (estimate).');
+    if(r.stale) parts.push('The bed data is out of date, so call to confirm before going.');
+    return parts.join(' ');
+  }
+
+  // ---------- drawing ----------
+  function el(html){ var d = document.createElement('div'); d.innerHTML = html; return d.firstElementChild; }
+
+  function renderChips(){
+    chipsEl.innerHTML = '';
+    Object.keys(EMERGENCIES).forEach(function(key){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.textContent = EMERGENCIES[key].label;
+      b.setAttribute('aria-pressed', selected === key ? 'true' : 'false');
+      b.addEventListener('click', function(){
+        selected = key;
+        renderChips();
+        renderRequirements();
+        renderResults();
+      });
+      chipsEl.appendChild(b);
+    });
+  }
+
+  function listItems(arr, fn){ return arr.map(function(x){ return '<li>' + (fn ? fn(x) : x) + '</li>'; }).join(''); }
+
+  function renderRequirements(){
+    if(!selected){
+      reqEl.innerHTML = '<p class="req-empty">Pick an emergency to see what the hospital and the cabin need.</p>';
+      return;
+    }
+    var em = EMERGENCIES[selected];
+    reqEl.innerHTML =
+      '<h3>What \u201c' + em.label.toLowerCase() + '\u201d needs</h3>' +
+      '<p class="req-empty">' + em.note + '</p>' +
+      '<div class="req-block"><h4>The hospital should have</h4><ul>' + listItems(em.must, function(f){ return FAC[f]; }) + '</ul></div>' +
+      '<div class="req-block"><h4>Helpful to have</h4><ul>' + listItems(em.nice, function(f){ return FAC[f]; }) + '</ul></div>' +
+      '<div class="req-block"><h4>Bed needed</h4><ul><li>' + BED_NAMES[em.bed] + '. ' + em.bedWhy + '</li></ul></div>' +
+      '<div class="req-block"><h4>The AeroMed cabin should carry</h4><ul>' + listItems(em.cabin) + '</ul></div>';
+  }
+
+  function bedHtml(h, em){
+    return Object.keys(BED_NAMES).map(function(k){
+      var total = h.beds[k];
+      if(!total){
+        return '<div class="bed' + (k === em.bed ? ' needed' : '') + ' none"><div class="bed-name"><span>' + BED_NAMES[k] + '</span><b>None listed</b></div><div class="meter"><span style="width:0"></span></div></div>';
+      }
+      var free = h.free[k];
+      var pct = Math.round(100 * free / total);
+      return '<div class="bed' + (k === em.bed ? ' needed' : '') + (free === 0 ? ' none' : '') + '">' +
+        '<div class="bed-name"><span>' + BED_NAMES[k] + (k === em.bed ? ' (needed)' : '') + '</span><b>' + free + ' / ' + total + ' free</b></div>' +
+        '<div class="meter"><span style="width:' + pct + '%"></span></div></div>';
+    }).join('');
+  }
+
+  var FIT_LABEL = { good:'Strong match', part:'Partial match', low:'Low match' };
+
+  function renderResults(){
+    if(!selected){
+      resultsEl.innerHTML = '<div class="results-empty">Choose an emergency to see hospitals ranked for it. Share your location to rank them by distance from where you are.</div>';
+      return;
+    }
+    var em = EMERGENCIES[selected];
+    var ranked = HOSPITALS.map(function(h){ return evaluate(h, em); })
+                          .sort(function(a,b){
+                            var ta = a.mustMiss.length === 0 ? 0 : 1, tb = b.mustMiss.length === 0 ? 0 : 1;
+                            return ta !== tb ? ta - tb : b.score - a.score;
+                          });
+
+    var nearest = Math.min.apply(null, ranked.map(function(r){ return r.km; }));
+    var head = '';
+    var best = ranked[0];
+    if(best.fit === 'good'){
+      head = 'Best match for ' + em.label.toLowerCase() + ': <strong>' + best.h.name + '</strong>.';
+    } else if(best.mustMiss.length === 0){
+      head = 'Best facility match for ' + em.label.toLowerCase() + ': <strong>' + best.h.name + '</strong>, but its ' + BED_NAMES[em.bed].toLowerCase() + ' look full in the simulated data. Call ahead to confirm.';
+    } else {
+      head = 'No hospital listed here has everything needed for ' + em.label.toLowerCase() + '. The closest fit is <strong>' + best.h.name + '</strong>. Call ahead, and ask the 108 dispatcher whether a larger hospital in another city is safer.';
+    }
+    var fullOnes = ranked.filter(function(r){ return r.mustMiss.length === 0; }).sort(function(a,b){ return a.km - b.km; });
+    var nearestOne = ranked.slice().sort(function(a,b){ return a.km - b.km; })[0];
+    if(fullOnes.length && nearestOne.mustMiss.length){
+      head += ' Nearer hospitals do not list everything needed. Hospitals with all of it: ' +
+        fullOnes.slice(0,3).map(function(r){ return r.h.name + ' (' + r.km.toFixed(1) + ' km)'; }).join(', ') + '.';
+    }
+    if(nearest > 80){
+      head += ' Your location is more than 80 km from these demo hospitals, which are in Vizianagaram and Visakhapatnam.';
+    }
+
+    var html = '<p class="results-head">' + head + '</p>';
+    ranked.forEach(function(r, i){
+      var h = r.h;
+      var mustList = em.must.map(function(f){
+        var ok = h.fac.indexOf(f) !== -1;
+        return '<li><span class="' + (ok ? 'yes' : 'no') + '">' + (ok ? '\u2713' : '\u2717') + '</span><span>' + FAC[f] + (ok ? '' : ' (not listed)') + '</span></li>';
+      }).join('');
+      var niceList = em.nice.map(function(f){
+        var ok = h.fac.indexOf(f) !== -1;
+        return '<li class="opt"><span>' + (ok ? '\u2713' : '\u2013') + '</span><span>' + FAC[f] + (ok ? '' : ' (not listed)') + '</span></li>';
+      }).join('');
+      var dirUrl = 'https://www.google.com/maps/dir/?api=1&destination=' + h.lat + ',' + h.lng;
+      html +=
+        '<article class="h-card' + (i === 0 ? ' best' : '') + '">' +
+          '<div class="h-top"><h3>' + h.name + '</h3><span class="fit fit-' + r.fit + '">' + (r.fit === 'part' && r.mustMiss.length === 0 ? 'Beds full' : FIT_LABEL[r.fit]) + '</span></div>' +
+          '<p class="h-sub">' + h.area + ' \u00b7 ' + r.km.toFixed(1) + ' km \u00b7 about ' + roadMinutes(r.km) + ' min by road (estimate)</p>' +
+          '<p class="h-why">' + explain(r, em) + '</p>' +
+          '<ul class="fac-list">' + mustList + niceList + '</ul>' +
+          '<div class="bed-grid">' + bedHtml(h, em) + '</div>' +
+          '<p class="h-meta">Bed numbers are simulated. Updated ' + h.minsAgo + ' min ago' + (r.stale ? ' <span class="stale">\u00b7 Out of date</span>' : '') + '.</p>' +
+          '<div class="h-actions"><a href="tel:' + h.phone.replace(/\s/g,'') + '">Call ' + h.phone + '</a><a href="' + dirUrl + '" target="_blank" rel="noopener">Directions</a></div>' +
+        '</article>';
+    });
+    resultsEl.innerHTML = html;
+  }
+
+  // ---------- location access ----------
+  function setLoc(text, cls){
+    locStatus.textContent = text;
+    locStatus.className = 'f-note' + (cls ? ' ' + cls : '');
+  }
+
+  if(locateBtn){
+    locateBtn.addEventListener('click', function(){
+      if(!navigator.geolocation){
+        setLoc('This browser cannot share your location. Using the Vizianagaram city centre instead.', 'loc-warn');
+        return;
+      }
+      locateBtn.disabled = true;
+      setLoc('Waiting for your permission\u2026 choose Allow in the browser prompt.');
+      navigator.geolocation.getCurrentPosition(
+        function(pos){
+          user = { lat:pos.coords.latitude, lng:pos.coords.longitude, shared:true };
+          var acc = Math.round(pos.coords.accuracy);
+          setLoc('Using your location, accurate to about ' + acc + ' m. It stays in this browser.', 'loc-ok');
+          locateBtn.disabled = false;
+          locateBtn.textContent = 'Update my location';
+          renderResults();
+        },
+        function(err){
+          user = { lat:DEFAULT_POINT.lat, lng:DEFAULT_POINT.lng, shared:false };
+          var msg = 'Could not get your location. Using the Vizianagaram city centre instead.';
+          if(err.code === 1) msg = 'Location access was blocked. Allow it in your browser\u2019s site settings and try again, or keep using the Vizianagaram city centre.';
+          else if(err.code === 2) msg = 'Your device could not work out its position. Using the Vizianagaram city centre instead.';
+          else if(err.code === 3) msg = 'Finding your location took too long. Try again, or keep using the Vizianagaram city centre.';
+          setLoc(msg, 'loc-warn');
+          locateBtn.disabled = false;
+          renderResults();
+        },
+        { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
+      );
+    });
+  }
+
+  // ---------- test controls ----------
+  if(refreshBtn){
+    refreshBtn.addEventListener('click', function(){ seed += 11; simulate(); renderResults(); });
+  }
+  if(staleToggle){
+    staleToggle.addEventListener('change', function(){ simulate(); renderResults(); });
+  }
+
+  // let the dispatch console reuse this data and re-render whenever results change
+  var _renderResults = renderResults;
+  renderResults = function(){ _renderResults(); document.dispatchEvent(new CustomEvent('aeromed:update')); };
+  window.AeroMedFinder = {
+    HOSPITALS: HOSPITALS, EMERGENCIES: EMERGENCIES, FAC: FAC, BED_NAMES: BED_NAMES,
+    evaluate: evaluate, distKm: distKm, roadMinutes: roadMinutes,
+    getUser: function(){ return user; },
+    setPlace: function(lat, lng, label){
+      user = { lat:lat, lng:lng, shared:false, label:label };
+      setLoc('Using ' + label + '.', 'loc-ok');
+      renderResults();
+    },
+    setUser: function(lat, lng, acc){
+      user = { lat:lat, lng:lng, shared:true, acc:acc };
+      setLoc('Using your location, accurate to about ' + Math.round(acc || 0) + ' m. It stays in this browser.', 'loc-ok');
+      renderResults();
+    },
+    getSelected: function(){ return selected; },
+    setSelected: function(k){ selected = k; renderChips(); renderRequirements(); renderResults(); }
+  };
+
+  simulate();
+  renderChips();
+  renderRequirements();
+  renderResults();
+})();
+</script>
+
+<script>
+// ===== Dispatch console: the five required outputs =====
+// 01 Ambulance dispatch  02 Hospital selection  03 Severity triage
+// 04 Capacity balancing  05 Response time score
+// Reads hospital data and ranking from the finder (window.AeroMedFinder) and can start the 3D cabin (window.AeroMedScene).
+(function(){
+  var F = window.AeroMedFinder;
+  var out = document.getElementById('console-out');
+  if(!F || !out) return;
+
+  // ---------- AMBULANCE DATA (simulated fleet; edit positions/crews here) ----------
+  var AMBS = [
+    { id:'AMB-01', crew:'ALS', base:'District HQ',        lat:18.1120, lng:83.4000, status:'available' },
+    { id:'AMB-02', crew:'ALS', base:'Balaji Nagar',       lat:18.1065, lng:83.4040, status:'available' },
+    { id:'AMB-03', crew:'BLS', base:'Kotha Agraharam',    lat:18.1010, lng:83.3920, status:'available' },
+    { id:'AMB-04', crew:'BLS', base:'Santha Pet',         lat:18.1180, lng:83.3980, status:'available' },
+    { id:'AMB-05', crew:'ALS', base:'Fort area',          lat:18.1150, lng:83.3890, status:'busy' }
+  ];
+  var CREW_NAME = { ALS:'advanced life support', BLS:'basic life support' };
+
+  // ---------- TRIAGE LEVELS ----------
+  // target = minutes from the call to the hospital door. distW = how much distance matters when choosing a hospital.
+  var TRI = {
+    red:    { label:'Critical (P1)', cls:'tri-red',    target:20,  als:true,  distW:2,   note:'Immediate. Life-threatening.' },
+    orange: { label:'Serious (P2)',  cls:'tri-orange', target:30,  als:true,  distW:1.5, note:'Very urgent. Could become critical.' },
+    yellow: { label:'Moderate (P3)', cls:'tri-yellow', target:60,  als:false, distW:1,   note:'Urgent but stable.' },
+    green:  { label:'Minor (P4)',    cls:'tri-green',  target:120, als:false, distW:1,   note:'Stable. Can wait.' }
+  };
+  var BASE = { cardiac:2, stroke:2, trauma:1, delivery:1, breathing:1 };
+
+  var busyUnits = {};   // units sent on a call this session
+  var reserved = {};    // beds reserved this session: "hospital|bedtype" -> count
+  var plan = null;
+  var locMsg = null, watchId = null, lastMap = null;
+
+  function $(id){ return document.getElementById(id); }
+  function val(id){ return $(id).value; }
+  function key(h, bed){ return h.name + '|' + bed; }
+  function effFree(h, bed){ return Math.max(0, (h.free[bed] || 0) - (reserved[key(h, bed)] || 0)); }
+  function clamp(x, a, b){ return Math.max(a, Math.min(b, x)); }
+
+  // ---------- 03 SEVERITY TRIAGE ----------
+  function triage(emKey){
+    var pts = 0, why = [];
+    var c = val('c-conscious'), b = val('c-breath'), bl = val('c-bleed');
+    var spo2 = +val('c-spo2'), hr = +val('c-hr');
+    var p;
+    p = { alert:0, voice:2, unresp:4 }[c]; pts += p; if(p) why.push((c === 'unresp' ? 'Unresponsive' : 'Responds only to voice or pain') + ' (+' + p + ')');
+    p = { normal:0, laboured:2, stopped:4 }[b]; pts += p; if(p) why.push((b === 'stopped' ? 'Not breathing' : 'Laboured breathing') + ' (+' + p + ')');
+    p = { none:0, controlled:1, severe:3 }[bl]; pts += p; if(p) why.push((bl === 'severe' ? 'Severe bleeding' : 'Bleeding, controlled') + ' (+' + p + ')');
+    p = spo2 >= 94 ? 0 : spo2 >= 90 ? 1 : spo2 >= 85 ? 2 : 3; pts += p; if(p) why.push('Oxygen level ' + spo2 + '% (+' + p + ')');
+    p = (hr > 140 || hr < 41) ? 3 : hr > 120 ? 2 : (hr > 100 || hr < 51) ? 1 : 0; pts += p; if(p) why.push('Heart rate ' + hr + ' bpm (+' + p + ')');
+    p = BASE[emKey]; pts += p; why.push('Type of emergency (+' + p + ')');
+
+    var level = pts >= 9 ? 'red' : pts >= 6 ? 'orange' : pts >= 3 ? 'yellow' : 'green';
+    if((emKey === 'cardiac' || emKey === 'stroke') && (level === 'yellow' || level === 'green')){
+      level = 'orange';
+      why.push('Heart attack and stroke are time-critical, so they are never ranked below serious');
+    }
+    if(c === 'unresp' || b === 'stopped'){
+      if(level !== 'red') why.push('Automatic escalation: unresponsive or not breathing is always critical');
+      level = 'red';
+    }
+    var t = TRI[level];
+    return { key:level, t:t, pts:pts, why:why };
+  }
+
+  // ---------- 02 + 04 HOSPITAL SELECTION WITH CAPACITY BALANCING ----------
+  function rank(em, tri){
+    var rows = F.HOSPITALS.map(function(h){
+      var r = F.evaluate(h, em);
+      var total = h.beds[em.bed];
+      var eff = total ? effFree(h, em.bed) : 0;
+      var load = total ? 1 - eff / total : 1;
+      var adj = r.score;
+      if(r.freeBeds > 0 && eff === 0) adj -= 25;                     // beds reserved by earlier dispatches
+      var penalty = 20 * Math.max(0, load - 0.6) / 0.4;              // crowded hospitals lose up to 20 points
+      adj -= penalty;
+      adj += (tri.t.distW - 1) * 15 * Math.max(0, 1 - r.km / 15);    // time-critical patients favour closer hospitals
+      return { h:h, r:r, total:total, eff:eff, load:load, penalty:penalty, adj:adj, ok:(r.mustMiss.length === 0 && eff > 0) };
+    });
+    // a hospital with every needed facility always ranks above one that lacks something; beds and load decide within each group
+    var balanced = rows.slice().sort(function(a, b){
+      var ta = a.r.mustMiss.length === 0 ? 0 : 1, tb = b.r.mustMiss.length === 0 ? 0 : 1;
+      return ta !== tb ? ta - tb : b.adj - a.adj;
+    });
+    var okRows = rows.filter(function(x){ return x.ok; }).sort(function(a, b){ return a.r.km - b.r.km; });
+    var nearestSuitable = okRows[0] || null;
+    var withFacilities = rows.filter(function(x){ return x.r.mustMiss.length === 0; })
+                             .sort(function(a, b){ return a.r.km - b.r.km; }).slice(0, 3);
+    return { balanced:balanced, chosen:balanced[0], nearestSuitable:nearestSuitable, withFacilities:withFacilities };
+  }
+
+  // ---------- 01 AMBULANCE DISPATCH ----------
+  function dispatch(tri){
+    var p = F.getUser();
+    var list = AMBS.map(function(a){
+      var km = F.distKm(p.lat, p.lng, a.lat, a.lng);
+      return { a:a, km:km, eta:Math.max(1, Math.round(1 + km * 1.4 / 30 * 60)),   // 1 min turnout, ~30 km/h with sirens
+               busy:(a.status === 'busy' || !!busyUnits[a.id]) };
+    }).sort(function(x, y){ return x.eta - y.eta; });
+    var free = list.filter(function(x){ return !x.busy; });
+    var als = free.filter(function(x){ return x.a.crew === 'ALS'; });
+    var chosen = (tri.t.als && als.length) ? als[0] : (free[0] || null);
+    return { list:list, chosen:chosen, needUpgrade:!!(chosen && tri.t.als && chosen.a.crew !== 'ALS') };
+  }
+
+  // ---------- 05 RESPONSE TIME SCORE ----------
+  function timing(disp, pick, tri){
+    var km = pick.r.km;
+    var road = F.roadMinutes(km);
+    var spd = +($('speed-slider') ? $('speed-slider').value : 50) || 50;
+    var aero = Math.max(3, Math.round(km * 1.15 / spd * 60 + 3));    // straighter line, plus ~3 min for the two lifts
+    var wanted = val('c-mode');
+    var aeroOk = km <= 15;                                  // the AeroMed line serves the city only
+    var mode = (wanted === 'aero' && aeroOk) ? 'aero' : 'road';
+    var transport = mode === 'aero' ? aero : road;
+    var scene = tri.key === 'red' ? 2 : 3;
+    var reach = disp.chosen ? disp.chosen.eta : 0;
+    var total = reach + scene + transport;
+    var ratio = total / tri.t.target;
+    var score = ratio <= 1 ? 100 - 40 * ratio : 60 - (ratio - 1) * 120;
+    if(pick.r.stale) score -= 5;
+    score = Math.round(clamp(score, 0, 100));
+    var grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 55 ? 'C' : score >= 40 ? 'D' : 'E';
+    return { reach:reach, scene:scene, transport:transport, total:total, road:road, aero:aero, spd:spd, mode:mode,
+             score:score, grade:grade, target:tri.t.target, wanted:wanted, aeroOk:aeroOk };
+  }
+
+  // ---------- drawing ----------
+  // ---------- Google Map of your location (reloads only after moving ~30 m) ----------
+  function updateMap(u){
+    if(lastMap && F.distKm(lastMap.lat, lastMap.lng, u.lat, u.lng) < 0.03) return;
+    lastMap = { lat:u.lat, lng:u.lng };
+    $('c-map').src = 'https://www.google.com/maps?q=' + u.lat + ',' + u.lng + '&z=16&output=embed';
+    $('c-map-link').href = 'https://www.google.com/maps/search/?api=1&query=' + u.lat + ',' + u.lng;
+  }
+
+  function card(num, title, inner){
+    return '<article class="out-card"><div class="out-head"><span class="out-num">' + num + '</span><h3>' + title + '</h3></div>' + inner + '</article>';
+  }
+  function status(row){
+    if(!row.total) return 'No such beds';
+    if(row.eff === 0) return 'Full';
+    return row.load >= 0.9 ? 'Near full' : row.load >= 0.7 ? 'Busy' : 'Open';
+  }
+
+  function render(){
+    // keep the console chips in sync with the finder's selected emergency
+    var sel = F.getSelected();
+    var chips = $('c-chips');
+    chips.innerHTML = '';
+    Object.keys(F.EMERGENCIES).forEach(function(k){
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip';
+      b.textContent = F.EMERGENCIES[k].label;
+      b.setAttribute('aria-pressed', sel === k ? 'true' : 'false');
+      b.addEventListener('click', function(){ F.setSelected(k); });
+      chips.appendChild(b);
+    });
+    $('c-spo2-v').textContent = val('c-spo2') + '%';
+    $('c-hr-v').textContent = val('c-hr') + ' bpm';
+    var u = F.getUser();
+    $('c-loc').textContent = locMsg || (u.label ? 'Patient location: ' + u.label + '.' : u.shared ? 'Showing your location' + (u.acc ? ', accurate to about ' + Math.round(u.acc) + ' m' : '') + '. It stays in this browser.' : 'Using the Vizianagaram city centre until you share your location.');
+    updateMap(u);
+
+    if(!sel){
+      plan = null;
+      out.innerHTML = '<div class="console-empty">Choose an emergency to see the five outputs.</div>';
+      return;
+    }
+
+    var em = F.EMERGENCIES[sel];
+    var tri = triage(sel);
+    var rk = rank(em, tri);
+    var pick = rk.chosen;
+    var disp = dispatch(tri);
+    var tm = timing(disp, pick, tri);
+    plan = { em:em, tri:tri, pick:pick, disp:disp, tm:tm };
+
+    // ----- 01 dispatch -----
+    var d1;
+    if(!disp.chosen){
+      d1 = '<p class="out-warn">No ambulance is free right now. Ask the 108 dispatcher for the next available unit.</p>';
+    } else {
+      var c = disp.chosen;
+      d1 = '<p class="out-main"><strong>' + c.a.id + '</strong> (' + CREW_NAME[c.a.crew] + ') from ' + c.a.base + ' · ' + c.km.toFixed(1) + ' km · reaches the patient in about <strong>' + c.eta + ' min</strong>.</p>' +
+           '<p class="out-sub">Nearest AeroMed pickup: Station A. ' + (tri.t.als ? 'This patient needs an advanced life support crew.' : 'A basic life support crew is enough for this patient.') + '</p>' +
+           (disp.needUpgrade ? '<p class="out-warn">No advanced life support unit is free. Send the nearest unit and ask 108 for ALS backup.</p>' : '') +
+           (c.eta > 30 ? '<p class="out-warn">The incident is far from the fleet area, so these times are long.</p>' : '');
+    }
+    d1 += '<div class="mini">' + disp.list.map(function(x){
+      var isPick = disp.chosen && x.a.id === disp.chosen.a.id;
+      return '<div class="mini-row' + (isPick ? ' pick' : '') + (x.busy ? ' off' : '') + '"><span>' + x.a.id + ' · ' + x.a.crew + '</span><span>' + x.a.base + ' · ' + x.km.toFixed(1) + ' km</span><span>' + (x.busy ? 'On a call' : x.eta + ' min') + '</span></div>';
+    }).join('') + '</div>' +
+    '<div class="console-actions">' +
+      '<button type="button" class="dispatch-btn" data-act="confirm"' + (disp.chosen ? '' : ' disabled') + '>Confirm dispatch</button>' +
+      '<button type="button" class="dispatch-btn" data-act="cabin">Launch cabin in the 3D scene</button>' +
+    '</div>';
+
+    // ----- 02 hospital -----
+    var h = pick.h, r = pick.r;
+    var facs = em.must.map(function(f){
+      var ok = h.fac.indexOf(f) !== -1;
+      return '<li><span class="' + (ok ? 'yes' : 'no') + '">' + (ok ? '\u2713' : '\u2717') + '</span><span>' + F.FAC[f] + (ok ? '' : ' (not listed)') + '</span></li>';
+    }).join('');
+    var hasAll = r.mustMiss.length === 0;
+    var fitTxt = hasAll ? (pick.eff > 0 ? 'good' : 'part') : (r.mustHave.length ? 'part' : 'low');
+    var fitLbl = fitTxt === 'good' ? 'Strong match' : fitTxt === 'part' ? (hasAll ? 'Beds full' : 'Partial match') : 'Low match';
+    var d2 = '<p class="out-main"><strong>' + h.name + '</strong> <span class="fit fit-' + fitTxt + '">' + fitLbl + '</span></p>' +
+      '<p class="out-sub">' + h.area + ' · ' + r.km.toFixed(1) + ' km · ' + (pick.total ? pick.eff + ' of ' + pick.total + ' ' + F.BED_NAMES[em.bed].toLowerCase() + ' free' : 'no ' + F.BED_NAMES[em.bed].toLowerCase() + ' listed') + '. Balanced score ' + Math.round(pick.adj) + '.</p>' +
+      '<ul class="fac-list">' + facs + '</ul>' +
+      (h.referral ? '<p class="out-warn">Referral hospital. The nearer Vizianagaram hospitals do not list everything this emergency needs. Ask the 108 dispatcher whether to stabilise at the nearest hospital first.</p>' : '') +
+      (hasAll && pick.eff === 0 ? '<p class="out-warn">This hospital has every facility needed, but its ' + F.BED_NAMES[em.bed].toLowerCase() + ' look full in the simulated data. Call ahead to confirm.</p>' : '') +
+      (!hasAll ? '<p class="out-warn">No hospital listed has every facility needed. Call ahead and ask 108 about a larger hospital in another city.</p>' : '') +
+      (r.stale ? '<p class="out-warn">Bed data is out of date. Call to confirm.</p>' : '') +
+      '<div class="h-actions"><a href="tel:' + h.phone.replace(/\s/g, '') + '">Call ' + h.phone + '</a><a href="https://www.google.com/maps/dir/?api=1&destination=' + h.lat + ',' + h.lng + '" target="_blank" rel="noopener">Directions</a></div>';
+
+    // nearby hospitals that have every facility this emergency needs (shown whenever any exist)
+    if(rk.withFacilities.length){
+      d2 += '<p class="out-sub">Nearest hospitals with everything needed:</p><div class="mini">' + rk.withFacilities.map(function(x){
+        var beds = x.total ? (x.eff > 0 ? x.eff + ' beds free' : 'beds full') : 'no beds listed';
+        return '<div class="mini-row' + (x.h === pick.h ? ' pick' : '') + '"><span>' + x.h.name + '</span><span>' + x.h.area + ' · ' + x.r.km.toFixed(1) + ' km</span><span>~' + F.roadMinutes(x.r.km) + ' min · ' + beds + '</span></div>';
+      }).join('') + '</div>';
+    }
+
+    // ----- 03 triage -----
+    var d3 = '<p class="out-main"><span class="tri-badge ' + tri.t.cls + '">' + tri.t.label + '</span> ' + tri.pts + ' points. ' + tri.t.note + '</p>' +
+      '<p class="out-sub">Target: patient at the hospital within ' + tri.t.target + ' min of the call.</p>' +
+      '<ul class="why-list">' + tri.why.map(function(w){ return '<li>' + w + '</li>'; }).join('') + '</ul>';
+
+    // ----- 04 capacity -----
+    var byLoad = rk.balanced.slice().sort(function(a, b){ return a.h.name < b.h.name ? -1 : 1; });
+    var note;
+    if(rk.nearestSuitable && rk.nearestSuitable.h !== pick.h){
+      note = 'Redirected from ' + rk.nearestSuitable.h.name + ' (' + Math.round(rk.nearestSuitable.load * 100) + '% full, ' + rk.nearestSuitable.r.km.toFixed(1) + ' km) to ' + pick.h.name + ' (' + Math.round(pick.load * 100) + '% full) to spread the load.';
+    } else if(rk.nearestSuitable){
+      note = 'The nearest suitable hospital also has good headroom, so no redirection is needed.';
+    } else {
+      note = 'No hospital has the needed facilities and a free bed. Showing the best partial match.';
+    }
+    var nRes = 0; Object.keys(reserved).forEach(function(k){ nRes += reserved[k]; });
+    var d4 = '<p class="out-main">Load on <strong>' + F.BED_NAMES[em.bed].toLowerCase() + '</strong> at each hospital.</p>' +
+      '<div class="mini">' + byLoad.map(function(x){
+        var pct = Math.round(x.load * 100);
+        return '<div class="mini-row cap' + (x.h === pick.h ? ' pick' : '') + '"><span>' + x.h.name + '</span>' +
+          '<div class="meter"><span style="width:' + pct + '%;background:' + (pct >= 90 ? 'var(--coral)' : pct >= 70 ? 'var(--amber)' : 'var(--ok)') + '"></span></div>' +
+          '<span>' + pct + '% · ' + status(x) + '</span></div>';
+      }).join('') + '</div>' +
+      '<p class="out-sub">' + note + '</p>' +
+      '<p class="out-sub">Beds reserved this session: ' + nRes + '. Hospitals above 60% load lose ranking points, so patients spread out.</p>';
+
+    // ----- 05 score -----
+    var saved = tm.road - tm.aero;
+    var d5 = '<div class="score-big"><span class="n">' + tm.score + '</span><span class="g">Grade ' + tm.grade + '</span><span class="out-sub" style="margin:0">out of 100</span></div>' +
+      '<div class="meter score-meter"><span style="width:' + tm.score + '%"></span></div>' +
+      '<div class="mini">' +
+        '<div class="mini-row"><span>Ambulance reaches patient</span><span></span><span>' + tm.reach + ' min</span></div>' +
+        '<div class="mini-row"><span>On scene</span><span></span><span>' + tm.scene + ' min</span></div>' +
+        '<div class="mini-row"><span>' + (tm.mode === 'aero' ? 'AeroMed cabin at ' + tm.spd + ' km/h' : (tm.wanted === 'aero' ? 'Road ambulance (hospital is beyond the AeroMed line)' : 'Road transport')) + '</span><span></span><span>' + tm.transport + ' min</span></div>' +
+        '<div class="mini-row pick"><span>Total, call to hospital</span><span>Target ' + tm.target + ' min</span><span>' + tm.total + ' min</span></div>' +
+      '</div>' +
+      (!tm.aeroOk ? '<p class="out-sub">This hospital is beyond the city AeroMed line, so the road is used.</p>' : '<p class="out-sub">Same trip by road: ' + tm.road + ' min. By AeroMed: ' + tm.aero + ' min. ' + (saved > 0 ? 'AeroMed saves about ' + saved + ' min.' : 'On a trip this short the lifts cost more time than the cabin saves.') + '</p>');
+
+    out.innerHTML = card('01', 'Ambulance dispatch', d1) + card('02', 'Hospital selection', d2) +
+                    card('03', 'Severity triage', d3) + card('04', 'Capacity balancing', d4) +
+                    card('05', 'Response time score', d5);
+  }
+
+
+  // ---------- actions ----------
+  out.addEventListener('click', function(e){
+    var btn = e.target.closest ? e.target.closest('[data-act]') : null;
+    if(!btn || !plan) return;
+    var act = btn.getAttribute('data-act');
+    if(act === 'confirm' && plan.disp.chosen){
+      var k = key(plan.pick.h, plan.em.bed);
+      if(plan.pick.total) reserved[k] = (reserved[k] || 0) + 1;
+      busyUnits[plan.disp.chosen.a.id] = true;
+      render();
+    } else if(act === 'cabin'){
+      if(window.AeroMedScene) window.AeroMedScene.dispatchTo(0);
+      var top = $('top'); if(top && top.scrollIntoView) top.scrollIntoView({ behavior:'smooth' });
+    }
+  });
+
+  ['c-conscious','c-breath','c-bleed','c-mode'].forEach(function(id){ $(id).addEventListener('change', render); });
+  ['c-spo2','c-hr'].forEach(function(id){ $(id).addEventListener('input', render); });
+  var sp = $('speed-slider'); if(sp) sp.addEventListener('input', render);
+  // ---------- choose any place: presets, search (OpenStreetMap Nominatim), or typed coordinates ----------
+  var PLACES = [
+    ['Vizianagaram city centre', 18.1067, 83.3955], ['Balaji Nagar, Vizianagaram', 18.1080, 83.4014],
+    ['Santha Pet, Vizianagaram', 18.1175, 83.4015], ['Fort area, Vizianagaram', 18.1150, 83.3890],
+    ['Kotha Agraharam, Vizianagaram', 18.1010, 83.3920], ['Bobbili', 18.5736, 83.3597],
+    ['Parvathipuram', 18.7833, 83.4256], ['Srikakulam', 18.2949, 83.8938], ['Visakhapatnam (Vizag) city', 17.6868, 83.2185]
+  ];
+  var placeSel = $('c-place');
+  PLACES.forEach(function(p, i){ var o = document.createElement('option'); o.value = i; o.textContent = p[0]; placeSel.appendChild(o); });
+
+  function choosePlace(lat, lng, label){
+    stopWatch();
+    locMsg = null;
+    F.setPlace(lat, lng, label);
+  }
+  placeSel.addEventListener('change', function(){
+    if(placeSel.value === '') return;
+    var p = PLACES[+placeSel.value];
+    choosePlace(p[1], p[2], p[0] + ' (approximate)');
+  });
+
+  var resultsSel = $('c-results'), resultsWrap = $('c-results-wrap'), found = [];
+  resultsSel.addEventListener('change', function(){
+    var r = found[+resultsSel.value];
+    if(r) choosePlace(r.lat, r.lng, r.label);
+  });
+
+  function doSearch(){
+    var q = $('c-search').value.trim();
+    if(!q) return;
+    resultsWrap.hidden = true;
+    var m = q.match(/^(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)$/);
+    if(m){
+      var la = parseFloat(m[1]), ln = parseFloat(m[2]);
+      if(la < -90 || la > 90 || ln < -180 || ln > 180){ locMsg = 'Those coordinates are not valid. Latitude is -90 to 90, longitude -180 to 180.'; render(); return; }
+      choosePlace(la, ln, 'coordinates ' + la.toFixed(4) + ', ' + ln.toFixed(4));
+      return;
+    }
+    locMsg = 'Searching...'; render();
+    fetch('https://nominatim.openstreetmap.org/search?format=json&limit=5&countrycodes=in&q=' + encodeURIComponent(q))
+      .then(function(r){ return r.json(); })
+      .then(function(list){
+        if(!list.length){ locMsg = 'No place found for that search. Try a nearby town, or type coordinates.'; render(); return; }
+        found = list.map(function(x){ return { lat:parseFloat(x.lat), lng:parseFloat(x.lon), label:x.display_name.split(',').slice(0, 3).join(',').trim() }; });
+        resultsSel.innerHTML = '';
+        found.forEach(function(x, i){ var o = document.createElement('option'); o.value = i; o.textContent = x.label; resultsSel.appendChild(o); });
+        resultsWrap.hidden = found.length < 2;
+        choosePlace(found[0].lat, found[0].lng, found[0].label);
+      })
+      .catch(function(){ locMsg = 'Search needs an internet connection. Pick a place from the list or type coordinates instead.'; render(); });
+  }
+  $('c-search-btn').addEventListener('click', doSearch);
+  $('c-search').addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); doSearch(); } });
+
+  var locBtn = $('c-locate');
+  function stopWatch(){ if(watchId !== null && navigator.geolocation) navigator.geolocation.clearWatch(watchId); watchId = null; locBtn.textContent = 'Start live location'; }
+  locBtn.addEventListener('click', function(){
+    if(watchId !== null){ stopWatch(); locMsg = 'Live location stopped. The map stays at your last position.'; render(); return; }
+    if(!navigator.geolocation){ locMsg = 'This browser cannot share your location.'; render(); return; }
+    locMsg = 'Waiting for permission. Choose Allow in the browser prompt.'; render();
+    watchId = navigator.geolocation.watchPosition(function(pos){
+      locMsg = null; placeSel.value = ''; locBtn.textContent = 'Stop live location';
+      F.setUser(pos.coords.latitude, pos.coords.longitude, pos.coords.accuracy);
+    }, function(err){
+      stopWatch();
+      locMsg = err.code === 1 ? 'Location access was blocked. Allow it in your browser site settings and try again.' : 'Could not get your location. Try again outdoors or with a better signal.';
+      render();
+    }, { enableHighAccuracy:true, maximumAge:10000, timeout:15000 });
+  });
+  $('c-reset').addEventListener('click', function(){ busyUnits = {}; reserved = {}; render(); });
+  document.addEventListener('aeromed:update', render);
+
+  render();
+})();
+</script>
+
+<script>
+// ===== 3D tilt on the scene, following the cursor (isolated from the scene logic above) =====
+(function(){
+  var tiltWrap = document.getElementById('tilt-wrap');
+  var canvasWrap = document.getElementById('hero-canvas-wrap');
+  if(!tiltWrap || !canvasWrap) return;
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  var maxTilt = 6;
+  tiltWrap.addEventListener('mousemove', function(e){
+    var rect = tiltWrap.getBoundingClientRect();
+    var px = (e.clientX - rect.left) / rect.width;
+    var py = (e.clientY - rect.top) / rect.height;
+    var rotY = (px - 0.5) * maxTilt * 2;
+    var rotX = (0.5 - py) * maxTilt * 2;
+    canvasWrap.style.transform = 'rotateX(' + rotX.toFixed(2) + 'deg) rotateY(' + rotY.toFixed(2) + 'deg)';
+  });
+  tiltWrap.addEventListener('mouseleave', function(){
+    canvasWrap.style.transform = 'rotateX(0deg) rotateY(0deg)';
+  });
+})();
+</script>
+</body>
+</html>
